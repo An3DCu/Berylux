@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(projects.core.model)
-    api(projects.core.data)
+    api(projects.core.domain)
     api(libs.junit4)
     api(libs.truth)
     api(libs.turbine)
