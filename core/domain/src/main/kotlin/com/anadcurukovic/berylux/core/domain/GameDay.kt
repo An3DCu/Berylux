@@ -1,5 +1,6 @@
 package com.anadcurukovic.berylux.core.domain
 
+import com.anadcurukovic.berylux.core.model.UserSettings
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -12,11 +13,10 @@ import java.time.ZoneId
  * change, the day still starts at the chosen local hour, and that game day is 23 or 25 hours long.
  */
 object GameDay {
-    const val DEFAULT_START_HOUR = 4
-    private val VALID_HOURS = 0..23
+    const val DEFAULT_START_HOUR = UserSettings.DEFAULT_DAY_START_HOUR
 
     fun of(instant: Instant, zone: ZoneId, startHour: Int = DEFAULT_START_HOUR): LocalDate {
-        require(startHour in VALID_HOURS) { "startHour must be 0 to 23, was $startHour" }
+        require(startHour in UserSettings.DAY_START_HOURS) { "startHour must be 0 to 23, was $startHour" }
         return instant.atZone(zone).toLocalDateTime().minusHours(startHour.toLong()).toLocalDate()
     }
 }

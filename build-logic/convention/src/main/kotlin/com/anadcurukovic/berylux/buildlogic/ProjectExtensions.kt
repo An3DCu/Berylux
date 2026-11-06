@@ -48,6 +48,11 @@ fun Project.configureUnitTests() {
     // Hilt and KSP generate test sources even in modules that have no tests yet.
     tasks.withType<Test>().configureEach {
         failOnNoDiscoveredTests.set(false)
+        // Robolectric reaches into JDK internals for file descriptors, which JDK 17+ lock by default.
+        jvmArgs(
+            "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
+            "--add-opens=java.base/java.io=ALL-UNNAMED",
+        )
     }
     dependencies {
         add("testImplementation", libs.lib("junit4"))
