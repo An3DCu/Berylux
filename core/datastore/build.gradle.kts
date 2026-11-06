@@ -1,0 +1,9 @@
+plugins {
+    alias(libs.plugins.berylux.android.library)
+    alias(libs.plugins.berylux.hilt)
+}
+
+dependencies {
+    implementation(projects.core.model)
+    implementation(libs.androidx.datastore.preferences)
+}
