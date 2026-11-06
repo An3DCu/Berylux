@@ -1,0 +1,25 @@
+# Only the changes from detekt's defaults (buildUponDefaultConfig = true).
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9]*'
+
+complexity:
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotated: ['Preview']
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+
+formatting:
+  android: true
+  MaximumLineLength:
+    maxLineLength: 120

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder: a cut gem outline. The real icon is designed in the character round. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="@color/red_beryl"
+        android:strokeLineJoin="round"
+        android:strokeWidth="2.5"
+        android:pathData="M42,38 L66,38 L76,49 L54,74 L32,49 Z M32,49 L76,49 M42,38 L54,74 M66,38 L54,74 M48,49 L54,38 L60,49" />
+</vector>
