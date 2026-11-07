@@ -34,8 +34,8 @@ class FakeProfileRepository(initial: Profile? = null) : ProfileRepository {
     private val state = MutableStateFlow(initial)
     override val profile: Flow<Profile?> = state
 
-    override suspend fun createGuest(name: String): Profile {
-        val created = Profile(id = 1, name = name, lux = 0, pickSeed = 42, createdAt = Instant.EPOCH)
+    override suspend fun createGuest(name: String, pickSeed: Long): Profile {
+        val created = Profile(id = 1, name = name, lux = 0, pickSeed = pickSeed, createdAt = Instant.EPOCH)
         state.value = created
         return created
     }

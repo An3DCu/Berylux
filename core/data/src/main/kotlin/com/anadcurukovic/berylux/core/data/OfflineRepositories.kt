@@ -34,7 +34,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
-import kotlin.random.Random
 
 internal class OfflineProfileRepository @Inject constructor(
     private val dao: ProfileDao,
@@ -42,8 +41,8 @@ internal class OfflineProfileRepository @Inject constructor(
 ) : ProfileRepository {
     override val profile: Flow<Profile?> = dao.observeFirst().map { it?.asModel() }
 
-    override suspend fun createGuest(name: String): Profile {
-        val entity = ProfileEntity(name = name, pickSeed = Random.nextLong(), createdAt = time.now())
+    override suspend fun createGuest(name: String, pickSeed: Long): Profile {
+        val entity = ProfileEntity(name = name, pickSeed = pickSeed, createdAt = time.now())
         val id = dao.insert(entity)
         return entity.copy(id = id).asModel()
     }

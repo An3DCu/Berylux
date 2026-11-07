@@ -21,7 +21,8 @@ interface ProfileRepository {
     /** The player's profile, or null before the first launch has made one. */
     val profile: Flow<Profile?>
 
-    suspend fun createGuest(name: String): Profile
+    /** [pickSeed] drives the daily pick and the sigil, so the welcome screen can show it first. */
+    suspend fun createGuest(name: String, pickSeed: Long): Profile
 
     suspend fun rename(profileId: Long, name: String)
 

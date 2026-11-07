@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.berylux.android.library)
+    alias(libs.plugins.berylux.jvm.library)
 }
 
 dependencies {

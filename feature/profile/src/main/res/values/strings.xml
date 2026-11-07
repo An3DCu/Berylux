@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="welcome_title">Welcome to Berylux</string>
+    <string name="welcome_draw_another">Draw another sigil</string>
+    <string name="welcome_name_label">Your name</string>
+    <string name="welcome_name_empty">Enter a name to start.</string>
+    <!-- The limit is always 20. -->
+    <string name="welcome_name_too_long" tools:ignore="PluralsCandidate">Keep it to %1$d characters.</string>
+    <string name="welcome_failed">Your profile couldn\'t be saved. Try again.</string>
+    <string name="welcome_start">Start</string>
+</resources>

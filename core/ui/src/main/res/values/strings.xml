@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources>
+    <string name="core_ui_rank_goshenite">Goshenite</string>
+    <string name="core_ui_rank_heliodor">Heliodor</string>
+    <string name="core_ui_rank_morganite">Morganite</string>
+    <string name="core_ui_rank_aquamarine">Aquamarine</string>
+    <string name="core_ui_rank_emerald">Emerald</string>
+    <string name="core_ui_rank_red_beryl">Red beryl</string>
+
+    <string name="core_ui_difficulty_easy">Easy</string>
+    <string name="core_ui_difficulty_medium">Medium</string>
+    <string name="core_ui_difficulty_hard">Hard</string>
+</resources>
