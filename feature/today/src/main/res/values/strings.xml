@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Lux is a unit, like km: "1 Lux", "500 Lux". The day always has 5 slots. -->
+    <string name="today_open_profile">Open your profile</string>
+    <string name="today_rank_line" tools:ignore="PluralsCandidate">%1$s · %2$d Lux</string>
+    <string name="today_to_next_rank" tools:ignore="PluralsCandidate">%1$d Lux to %2$s</string>
+    <string name="today_top_rank">Top rank reached</string>
+    <string name="today_slots" tools:ignore="PluralsCandidate">%1$d of %2$d cases today</string>
+
+    <string name="today_daily_title">Daily case</string>
+    <string name="today_bonus_title">Bonus case</string>
+    <string name="today_picks_title">Picks</string>
+    <string name="today_filter_all">All</string>
+    <string name="today_nothing_here">Nothing here today.</string>
+
+    <string name="today_card_meta">%1$s · %2$s</string>
+    <string name="today_card_lux" tools:ignore="PluralsCandidate">+%1$d Lux</string>
+    <string name="today_card_take">Take it</string>
+    <string name="today_card_taken">Taken</string>
+
+    <string name="today_taken">Taken: %1$s</string>
+    <string name="today_day_full">That\'s 5 cases today. Drop one to take another.</string>
+    <string name="today_already_taken">You already have this one today.</string>
+    <string name="today_failed">That didn\'t work. Try again.</string>
+    <string name="today_error">Today couldn\'t be loaded. Restart the app to try again.</string>
+</resources>

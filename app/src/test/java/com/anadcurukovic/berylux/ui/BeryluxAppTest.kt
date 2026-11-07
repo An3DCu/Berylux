@@ -1,32 +1,53 @@
 package com.anadcurukovic.berylux.ui
 
-import android.app.Application
-import androidx.activity.ComponentActivity
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
-import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
+import com.anadcurukovic.berylux.MainActivity
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.HiltTestApplication
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Taps through the real app shell on Robolectric: tabs, links, Back and restored state. */
+/**
+ * The real app on Robolectric: Hilt, Room, DataStore and every screen, as a player would use it.
+ * Each test starts with a fresh install.
+ */
+@OptIn(ExperimentalTestApi::class)
+@HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class)
+// A normal phone screen; Robolectric's default is 320 by 470 dp.
+@Config(application = HiltTestApplication::class, qualifiers = "w411dp-h891dp")
 class BeryluxAppTest {
-    @get:Rule
-    val compose = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule(order = 0)
+    val hilt = HiltAndroidRule(this)
 
-    private fun showApp() = compose.setContent { MaterialTheme { BeryluxApp() } }
+    @get:Rule(order = 1)
+    val compose = createAndroidComposeRule<MainActivity>()
 
-    private fun assertOn(title: String) {
-        compose.onNode(hasText(title) and isHeading()).assertExists()
-    }
+    @Before
+    fun inject() = hilt.inject()
+
+    // Room answers on its own threads, so wait for text instead of assuming it's there.
+    private fun waitForText(text: String) =
+        compose.waitUntilAtLeastOneExists(hasText(text, substring = true), timeoutMillis = 5_000)
+
+    private fun assertOn(title: String) =
+        compose.waitUntilAtLeastOneExists(hasText(title) and isHeading(), timeoutMillis = 5_000)
 
     private fun tap(text: String) = compose.onNodeWithText(text).performClick()
 
@@ -35,15 +56,38 @@ class BeryluxAppTest {
         compose.waitForIdle()
     }
 
+    private fun startAs(name: String) {
+        assertOn("Welcome to Berylux")
+        compose.onNode(hasSetTextAction()).performTextInput(name)
+        tap("Start")
+        assertOn("Daily case")
+    }
+
     @Test
-    fun opensOnToday() {
-        showApp()
-        assertOn("Today")
+    fun firstLaunchAsksForANameThenOpensToday() {
+        startAs("Sam")
+        waitForText("Sam")
+        waitForText("0 of 5 cases today")
+    }
+
+    @Test
+    fun startingWithoutANameSaysWhy() {
+        assertOn("Welcome to Berylux")
+        tap("Start")
+        waitForText("Enter a name to start.")
+    }
+
+    @Test
+    fun takingACaseUsesASlot() {
+        startAs("Sam")
+        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
+        waitForText("Taken:")
+        waitForText("1 of 5 cases today")
     }
 
     @Test
     fun backWalksDownTheTabThenToTodayThenLeaves() {
-        showApp()
+        startAs("Sam")
         tap("Catalog")
         tap("Open a category")
         tap("New challenge")
@@ -54,14 +98,14 @@ class BeryluxAppTest {
         pressBack()
         assertOn("Catalog")
         pressBack()
-        assertOn("Today")
+        assertOn("Daily case")
         pressBack()
         compose.activityRule.scenario.onActivity { check(it.isFinishing) { "Back on Today should leave the app" } }
     }
 
     @Test
     fun eachTabRemembersWhereYouWere() {
-        showApp()
+        startAs("Sam")
         tap("Catalog")
         tap("Open a category")
         tap("Cases")
@@ -71,20 +115,21 @@ class BeryluxAppTest {
     }
 
     @Test
-    fun profileAndSettingsOpenFromToday() {
-        showApp()
-        tap("Profile")
+    fun profileOpensFromTheSigilAndSettingsFromProfile() {
+        startAs("Sam")
+        compose.onNode(hasContentDescription("Open your profile")).performClick()
+        assertOn("Profile")
         tap("Settings")
         assertOn("Settings")
         pressBack()
         assertOn("Profile")
         pressBack()
-        assertOn("Today")
+        assertOn("Daily case")
     }
 
     @Test
     fun rivalsOpenFromProgress() {
-        showApp()
+        startAs("Sam")
         tap("Progress")
         tap("Rivals")
         assertOn("Rivals")
@@ -92,11 +137,10 @@ class BeryluxAppTest {
 
     @Test
     fun thePlaceSurvivesARecreate() {
-        val restoration = StateRestorationTester(compose)
-        restoration.setContent { MaterialTheme { BeryluxApp() } }
+        startAs("Sam")
         tap("Catalog")
         tap("Open a category")
-        restoration.emulateSavedInstanceStateRestore()
+        compose.activityRule.scenario.recreate()
         assertOn("Category 1")
     }
 }

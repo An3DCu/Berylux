@@ -47,7 +47,7 @@ class OfflineRepositoriesTest {
     @Test
     fun `a guest profile is created with a seed of its own`() = runTest {
         assertThat(profiles.profile.first()).isNull()
-        val created = profiles.createGuest("Guest")
+        val created = profiles.createGuest("Guest", pickSeed = 42)
         val stored = profiles.profile.first()!!
         assertThat(stored).isEqualTo(created)
         assertThat(stored.createdAt).isEqualTo(now)
@@ -65,7 +65,7 @@ class OfflineRepositoriesTest {
 
     @Test
     fun `custom challenges go in My cases and take their cases with them when deleted`() = runTest {
-        val profile = profiles.createGuest("Guest")
+        val profile = profiles.createGuest("Guest", pickSeed = 42)
         val id = challenges.addCustom(
             title = "Read a poem",
             description = "",
@@ -84,7 +84,7 @@ class OfflineRepositoriesTest {
 
     @Test
     fun `a case is accepted, closed once and shows up with its challenge`() = runTest {
-        val profile = profiles.createGuest("Guest")
+        val profile = profiles.createGuest("Guest", pickSeed = 42)
         val caseId = cases.accept(profile.id, challengeId = 4, isDaily = true, at = now, on = today)
         assertThat(cases.close(caseId, at = now, on = today, luxEarned = 38)).isTrue()
         assertThat(cases.close(caseId, at = now, on = today, luxEarned = 38)).isFalse()
@@ -99,7 +99,7 @@ class OfflineRepositoriesTest {
 
     @Test
     fun `an achievement unlocks once`() = runTest {
-        val profile = profiles.createGuest("Guest")
+        val profile = profiles.createGuest("Guest", pickSeed = 42)
         assertThat(achievements.unlock(profile.id, "first_case", now)).isTrue()
         assertThat(achievements.unlock(profile.id, "first_case", now)).isFalse()
         assertThat(achievements.unlocked(profile.id).first()).containsExactly("first_case")
