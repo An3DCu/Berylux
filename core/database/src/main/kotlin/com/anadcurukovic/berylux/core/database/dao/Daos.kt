@@ -95,6 +95,10 @@ interface CaseDao {
 
     @Query("UPDATE cases SET status = :status WHERE id = :id AND status = 'OPEN'")
     suspend fun setStatusIfOpen(id: Long, status: CaseStatus): Int
+
+    /** Cases still open from a day before [day] go cold. Returns how many did. */
+    @Query("UPDATE cases SET status = 'COLD' WHERE profile_id = :profileId AND status = 'OPEN' AND accepted_on < :day")
+    suspend fun markColdBefore(profileId: Long, day: LocalDate): Int
 }
 
 @Dao

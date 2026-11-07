@@ -9,6 +9,7 @@ import com.anadcurukovic.berylux.core.database.seed.SeedData
 import com.anadcurukovic.berylux.core.domain.repository.TimeSource
 import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.model.Difficulty
+import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -56,17 +57,16 @@ class OfflineRepositoriesTest {
 
     @Test
     fun `the seed comes through as models`() = runTest {
-        assertThat(challenges.categories.first()).hasSize(7)
+        assertThat(challenges.categories.first()).hasSize(8)
         assertThat(challenges.challenges.first()).hasSize(56)
         assertThat(challenges.challengesIn(7).first().all { it.difficulty == Difficulty.HARD }).isTrue()
         assertThat(challenges.challenge(1)!!.title).isEqualTo("Stretch break")
     }
 
     @Test
-    fun `custom challenges can be added, changed and deleted until they have cases`() = runTest {
+    fun `custom challenges go in My cases and take their cases with them when deleted`() = runTest {
         val profile = profiles.createGuest("Guest")
         val id = challenges.addCustom(
-            categoryId = 2,
             title = "Read a poem",
             description = "",
             difficulty = Difficulty.EASY,
@@ -74,9 +74,12 @@ class OfflineRepositoriesTest {
         challenges.updateCustom(challenges.challenge(id)!!.copy(title = "Read two poems"))
         assertThat(challenges.challenge(id)!!.title).isEqualTo("Read two poems")
 
+        assertThat(challenges.challenge(id)!!.categoryId).isEqualTo(MY_CASES_CATEGORY_ID)
+
         cases.accept(profile.id, id, isDaily = false, at = now, on = today)
-        assertThat(challenges.deleteCustom(id)).isFalse()
         assertThat(challenges.deleteCustom(1)).isFalse()
+        assertThat(challenges.deleteCustom(id)).isTrue()
+        assertThat(cases.caseFiles(profile.id).first()).isEmpty()
     }
 
     @Test

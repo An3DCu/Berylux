@@ -1,18 +1,16 @@
 package com.anadcurukovic.berylux.core.database
 
-import android.database.sqlite.SQLiteConstraintException
 import com.anadcurukovic.berylux.core.database.entity.AchievementUnlockEntity
 import com.anadcurukovic.berylux.core.database.entity.CaseEntity
 import com.anadcurukovic.berylux.core.database.entity.ChallengeEntity
 import com.anadcurukovic.berylux.core.database.entity.ProfileEntity
 import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.model.Difficulty
+import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,7 +51,7 @@ class DaoTest {
 
     private suspend fun insertCustom(): Long = db.challengeDao().insert(
         ChallengeEntity(
-            categoryId = 1,
+            categoryId = MY_CASES_CATEGORY_ID,
             title = "My own",
             description = "",
             difficulty = Difficulty.EASY,
@@ -83,7 +81,7 @@ class DaoTest {
         val id = insertCustom()
         assertThat(id).isGreaterThan(56L)
         assertThat(db.challengeDao().observeCustom().first().map { it.title }).containsExactly("My own")
-        assertThat(db.challengeDao().observeInCategory(1).first()).hasSize(9)
+        assertThat(db.challengeDao().observeInCategory(MY_CASES_CATEGORY_ID).first()).hasSize(1)
     }
 
     @Test
@@ -95,13 +93,33 @@ class DaoTest {
     }
 
     @Test
-    fun `a challenge with cases can't be deleted`() = runTest {
+    fun `deleting a custom challenge deletes its cases too`() = runTest {
         val profileId = newProfile()
         val customId = insertCustom()
-        accept(profileId, customId)
-        assertThrows(SQLiteConstraintException::class.java) {
-            runBlocking { db.challengeDao().deleteCustom(customId) }
-        }
+        val caseId = accept(profileId, customId)
+        db.caseDao().close(caseId, at = now, on = today, lux = 0)
+        accept(profileId, challengeId = 1)
+
+        assertThat(db.challengeDao().deleteCustom(customId)).isEqualTo(1)
+        val left = db.caseDao().observeAll(profileId).first().map { it.challenge.id }
+        assertThat(left).containsExactly(1L)
+        assertThat(db.caseDao().observeClosedDays(profileId).first()).isEmpty()
+    }
+
+    @Test
+    fun `cases left open from an earlier day go cold, today's stay open`() = runTest {
+        val profileId = newProfile()
+        val yesterdays = accept(profileId, challengeId = 1, on = today.minusDays(1))
+        val closedYesterday = accept(profileId, challengeId = 2, on = today.minusDays(1))
+        db.caseDao().close(closedYesterday, at = now, on = today.minusDays(1), lux = 10)
+        accept(profileId, challengeId = 3)
+
+        assertThat(db.caseDao().markColdBefore(profileId, today)).isEqualTo(1)
+        val statuses = db.caseDao().observeAll(profileId).first().associate { it.case.id to it.case.status }
+        assertThat(statuses[yesterdays]).isEqualTo(CaseStatus.COLD)
+        assertThat(statuses[closedYesterday]).isEqualTo(CaseStatus.CLOSED)
+        assertThat(statuses.values.count { it == CaseStatus.OPEN }).isEqualTo(1)
+        assertThat(db.caseDao().close(yesterdays, at = now, on = today, lux = 10)).isEqualTo(0)
     }
 
     @Test

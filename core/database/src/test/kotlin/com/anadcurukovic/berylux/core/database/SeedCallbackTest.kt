@@ -21,7 +21,7 @@ class SeedCallbackTest {
     @Test
     fun `the first query already sees the whole seed`() = runTest {
         val db = seededInMemoryDatabase()
-        assertThat(db.categoryDao().observeAll().first()).hasSize(7)
+        assertThat(db.categoryDao().observeAll().first()).hasSize(8)
         val challenges = db.challengeDao().observeAll().first()
         assertThat(challenges).hasSize(56)
         assertThat(challenges.first().title).isEqualTo("Stretch break")
@@ -43,7 +43,7 @@ class SeedCallbackTest {
 
         val second = open()
         assertThat(second.challengeDao().observeAll().first()).hasSize(56)
-        assertThat(second.categoryDao().observeAll().first()).hasSize(7)
+        assertThat(second.categoryDao().observeAll().first()).hasSize(8)
         second.close()
     }
 }

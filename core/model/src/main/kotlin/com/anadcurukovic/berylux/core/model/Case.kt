@@ -7,6 +7,9 @@ enum class CaseStatus {
     OPEN,
     CLOSED,
     DROPPED,
+
+    /** Still open when its day ended. Kept in history, can't be closed any more. */
+    COLD,
 }
 
 /**

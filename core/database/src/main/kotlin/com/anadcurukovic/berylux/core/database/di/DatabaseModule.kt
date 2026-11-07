@@ -2,6 +2,7 @@ package com.anadcurukovic.berylux.core.database.di
 
 import android.content.Context
 import androidx.room.Room
+import com.anadcurukovic.berylux.core.database.ALL_MIGRATIONS
 import com.anadcurukovic.berylux.core.database.BeryluxDatabase
 import com.anadcurukovic.berylux.core.database.dao.AchievementDao
 import com.anadcurukovic.berylux.core.database.dao.CaseDao
@@ -24,6 +25,7 @@ internal object DatabaseModule {
     @Singleton
     fun database(@ApplicationContext context: Context): BeryluxDatabase =
         Room.databaseBuilder(context, BeryluxDatabase::class.java, BeryluxDatabase.NAME)
+            .apply { ALL_MIGRATIONS.forEach { addMigrations(it) } }
             .addCallback(SeedCallback { context.assets.open(SeedData.ASSET_PATH).use(SeedData::parse) })
             .build()
 

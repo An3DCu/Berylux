@@ -3,6 +3,7 @@ package com.anadcurukovic.berylux.core.database
 import com.anadcurukovic.berylux.core.database.seed.SeedData
 import com.anadcurukovic.berylux.core.model.CategoryKind
 import com.anadcurukovic.berylux.core.model.Difficulty
+import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.io.File
@@ -12,9 +13,15 @@ class SeedDataTest {
     private val seed = File("src/main/assets/${SeedData.ASSET_PATH}").inputStream().use(SeedData::parse)
 
     @Test
-    fun `seven categories, one of them bonus`() {
-        assertThat(seed.categories).hasSize(7)
-        assertThat(seed.categories.count { it.kind == CategoryKind.BONUS }).isEqualTo(1)
+    fun `eight categories, six regular, one bonus and My cases`() {
+        assertThat(seed.categories.groupingBy { it.kind }.eachCount())
+            .containsExactly(CategoryKind.REGULAR, 6, CategoryKind.BONUS, 1, CategoryKind.CUSTOM, 1)
+        assertThat(seed.categories.single { it.kind == CategoryKind.CUSTOM }.id).isEqualTo(MY_CASES_CATEGORY_ID)
+    }
+
+    @Test
+    fun `My cases starts empty`() {
+        assertThat(seed.challenges.none { it.categoryId == MY_CASES_CATEGORY_ID }).isTrue()
     }
 
     @Test
