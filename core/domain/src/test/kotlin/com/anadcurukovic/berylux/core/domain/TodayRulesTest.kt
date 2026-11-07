@@ -126,8 +126,8 @@ class AcceptCaseUseCaseTest {
         categories = listOf(Category(1, "Body", "", CategoryKind.REGULAR)),
         challenges = (1L..8L).map { Challenge(it, 1, "Challenge $it", "", Difficulty.EASY) },
     )
-    private val cases = FakeCaseRepository(challenges)
     private val profiles = FakeProfileRepository()
+    private val cases = FakeCaseRepository(challenges, profiles)
     private val accept = AcceptCaseUseCase(
         profiles = profiles,
         cases = cases,
@@ -155,7 +155,7 @@ class AcceptCaseUseCaseTest {
         profiles.createGuest("Sam", pickSeed = 1)
         val first = accept(3, isDaily = false) as AcceptResult.Accepted
         assertThat(accept(3, isDaily = false)).isEqualTo(AcceptResult.AlreadyTaken)
-        cases.drop(first.caseId)
+        cases.drop(first.caseId, penalty = LuxRules.DROP_PENALTY)
         assertThat(accept(3, isDaily = false)).isInstanceOf(AcceptResult.Accepted::class.java)
     }
 

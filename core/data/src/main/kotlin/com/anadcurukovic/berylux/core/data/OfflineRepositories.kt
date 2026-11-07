@@ -116,9 +116,9 @@ internal class OfflineCaseRepository @Inject constructor(
         )
 
     override suspend fun close(caseId: Long, at: Instant, on: LocalDate, luxEarned: Int): Boolean =
-        dao.close(caseId, at, on, luxEarned) > 0
+        dao.closeAndPay(caseId, at, on, luxEarned)
 
-    override suspend fun drop(caseId: Long): Boolean = dao.setStatusIfOpen(caseId, CaseStatus.DROPPED) > 0
+    override suspend fun drop(caseId: Long, penalty: Int): Boolean = dao.dropAndCharge(caseId, penalty)
 
     override suspend fun markColdBefore(profileId: Long, day: LocalDate): Int = dao.markColdBefore(profileId, day)
 

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -86,6 +87,42 @@ class BeryluxAppTest {
     }
 
     @Test
+    fun aCaseTakenOnTodayIsClosedFromCasesAfterAYes() {
+        startAs("Sam")
+        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
+        waitForText("Taken:")
+        tap("Cases")
+        waitForText("Today · 1 of 5 cases")
+        tap("Close")
+        tap("Close it")
+        waitForText("Closed:")
+        waitForText("Lux earned")
+    }
+
+    @Test
+    fun droppingACaseAsksFirstAndCostsFiveLux() {
+        startAs("Sam")
+        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
+        waitForText("Taken:")
+        tap("Cases")
+        waitForText("Today · 1 of 5 cases")
+        tap("Drop")
+        waitForText("It costs 5 Lux and frees the slot.")
+        compose.onAllNodesWithText("Drop").onLast().performClick()
+        waitForText("Dropped:")
+        waitForText("Today · 0 of 5 cases")
+    }
+
+    @Test
+    fun anEmptyCasesTabLeadsToToday() {
+        startAs("Sam")
+        tap("Cases")
+        waitForText("No cases today.")
+        tap("Go to Today")
+        assertOn("Daily case")
+    }
+
+    @Test
     fun backWalksDownTheTabThenToTodayThenLeaves() {
         startAs("Sam")
         tap("Catalog")
@@ -109,7 +146,7 @@ class BeryluxAppTest {
         tap("Catalog")
         tap("Open a category")
         tap("Cases")
-        assertOn("Cases")
+        assertOn("Earlier")
         tap("Catalog")
         assertOn("Category 1")
     }

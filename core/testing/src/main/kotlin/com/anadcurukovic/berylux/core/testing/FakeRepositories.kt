@@ -43,6 +43,15 @@ class FakeProfileRepository(initial: Profile? = null) : ProfileRepository {
     override suspend fun rename(profileId: Long, name: String) = state.update { it?.copy(name = name) }
 
     override suspend fun addLux(profileId: Long, amount: Int) = state.update { it?.copy(lux = it.lux + amount) }
+
+    /** For the fake cases: the same floor at 0 as the database. */
+    internal fun changeLux(profileId: Long, amount: Int) = state.update { profile ->
+        if (profile == null || profile.id != profileId) {
+            profile
+        } else {
+            profile.copy(lux = (profile.lux + amount).coerceAtLeast(0))
+        }
+    }
 }
 
 class FakeChallengeRepository(
@@ -85,7 +94,10 @@ class FakeChallengeRepository(
     }
 }
 
-class FakeCaseRepository(private val challenges: FakeChallengeRepository) : CaseRepository {
+class FakeCaseRepository(
+    private val challenges: FakeChallengeRepository,
+    private val profiles: FakeProfileRepository = FakeProfileRepository(),
+) : CaseRepository {
     private val cases = MutableStateFlow(emptyList<Pair<Long, Case>>())
     private var nextId = 1L
 
@@ -125,11 +137,12 @@ class FakeCaseRepository(private val challenges: FakeChallengeRepository) : Case
     }
 
     override suspend fun close(caseId: Long, at: Instant, on: LocalDate, luxEarned: Int): Boolean =
-        changeIfOpen(caseId) {
+        changeIfOpen(caseId, luxChange = luxEarned) {
             it.copy(status = CaseStatus.CLOSED, closedAt = at, closedOn = on, luxEarned = luxEarned)
         }
 
-    override suspend fun drop(caseId: Long): Boolean = changeIfOpen(caseId) { it.copy(status = CaseStatus.DROPPED) }
+    override suspend fun drop(caseId: Long, penalty: Int): Boolean =
+        changeIfOpen(caseId, luxChange = -penalty) { it.copy(status = CaseStatus.DROPPED) }
 
     override suspend fun markColdBefore(profileId: Long, day: LocalDate): Int {
         val goingCold = cases.value.filter { (owner, case) ->
@@ -141,10 +154,11 @@ class FakeCaseRepository(private val challenges: FakeChallengeRepository) : Case
         return goingCold.size
     }
 
-    private fun changeIfOpen(caseId: Long, change: (Case) -> Case): Boolean {
+    private fun changeIfOpen(caseId: Long, luxChange: Int, change: (Case) -> Case): Boolean {
         val found = cases.value.firstOrNull { it.second.id == caseId && it.second.status == CaseStatus.OPEN }
             ?: return false
         cases.update { list -> list.map { if (it === found) it.first to change(it.second) else it } }
+        profiles.changeLux(found.first, luxChange)
         return true
     }
 }
