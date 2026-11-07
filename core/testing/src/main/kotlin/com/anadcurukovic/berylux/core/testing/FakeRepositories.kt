@@ -167,14 +167,14 @@ class FakeCaseRepository(
 }
 
 class FakeAchievementRepository : AchievementRepository {
-    private val unlocks = MutableStateFlow(emptyMap<Long, Set<String>>())
+    private val unlocks = MutableStateFlow(emptyMap<Long, Map<String, Instant>>())
 
-    override fun unlocked(profileId: Long): Flow<Set<String>> = unlocks.map { it[profileId].orEmpty() }
+    override fun unlocked(profileId: Long): Flow<Map<String, Instant>> = unlocks.map { it[profileId].orEmpty() }
 
     override suspend fun unlock(profileId: Long, key: String, at: Instant): Boolean {
         val current = unlocks.value[profileId].orEmpty()
         if (key in current) return false
-        unlocks.update { it + (profileId to current + key) }
+        unlocks.update { it + (profileId to current + (key to at)) }
         return true
     }
 }
@@ -188,6 +188,13 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
     override suspend fun setTheme(theme: ThemeMode) = state.update { it.copy(theme = theme) }
 
     override suspend fun setEffectsLevel(level: Int) = state.update { it.copy(effectsLevel = level) }
+
+    private val seenAt = MutableStateFlow(Instant.EPOCH)
+    override val achievementsSeenAt: Flow<Instant> = seenAt
+
+    override suspend fun markAchievementsSeen(at: Instant) {
+        seenAt.value = at
+    }
 }
 
 /** A clock that only moves when a test moves it. */

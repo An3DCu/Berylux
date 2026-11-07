@@ -1,17 +1,29 @@
 package com.anadcurukovic.berylux.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.anadcurukovic.berylux.R
 import com.anadcurukovic.berylux.core.navigation.CategoryRoute
 import com.anadcurukovic.berylux.core.navigation.EditorRoute
 import com.anadcurukovic.berylux.core.navigation.Navigator
@@ -20,6 +32,7 @@ import com.anadcurukovic.berylux.core.navigation.RivalsRoute
 import com.anadcurukovic.berylux.core.navigation.SettingsRoute
 import com.anadcurukovic.berylux.core.navigation.TodayRoute
 import com.anadcurukovic.berylux.core.navigation.rememberNavigationState
+import com.anadcurukovic.berylux.core.ui.titleRes
 import com.anadcurukovic.berylux.feature.catalog.catalogEntries
 import com.anadcurukovic.berylux.feature.editor.editorEntries
 import com.anadcurukovic.berylux.feature.profile.profileEntries
@@ -41,13 +54,22 @@ fun BeryluxApp(modifier: Modifier = Modifier, appViewModel: AppViewModel = hiltV
         // The first read of the database takes a moment; the window background shows meanwhile.
         AppState.Loading -> Unit
         AppState.NeedsProfile -> WelcomeScreen(modifier = modifier)
-        AppState.Ready -> BeryluxTabs(modifier = modifier)
+        AppState.Ready -> BeryluxTabs(appViewModel, modifier = modifier)
     }
 }
 
 /** The tabs and the screens behind them. */
 @Composable
-private fun BeryluxTabs(modifier: Modifier = Modifier) {
+private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifier) {
+    val hasNewAchievements by appViewModel.hasNewAchievements.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    val resources = LocalResources.current
+    LaunchedEffect(appViewModel, resources) {
+        appViewModel.unlockFlow.collect { achievement ->
+            snackbar.showSnackbar(resources.getString(R.string.unlocked, resources.getString(achievement.titleRes())))
+        }
+    }
+
     val tabs = TopLevelTab.entries
     val state = rememberNavigationState(startRoute = TodayRoute, topLevelRoutes = tabs.map { it.route })
     val navigator = remember(state) { Navigator(state) }
@@ -74,15 +96,27 @@ private fun BeryluxTabs(modifier: Modifier = Modifier) {
                 item(
                     selected = tab.route == state.topLevelRoute,
                     onClick = { navigator.navigate(tab.route) },
-                    icon = { Icon(painterResource(tab.icon), contentDescription = null) },
+                    icon = {
+                        BadgedBox(badge = { if (tab == TopLevelTab.PROGRESS && hasNewAchievements) Badge() }) {
+                            Icon(painterResource(tab.icon), contentDescription = null)
+                        }
+                    },
                     label = { Text(tab.label) },
                 )
             }
         },
     ) {
-        NavDisplay(
-            entries = state.toDecoratedEntries(entryProvider),
-            onBack = { navigator.goBack() },
-        )
+        // Unlock messages drop in at the top of whatever screen is open; a screen's own
+        // messages keep the bottom, so both can show at once.
+        Box {
+            NavDisplay(
+                entries = state.toDecoratedEntries(entryProvider),
+                onBack = { navigator.goBack() },
+            )
+            SnackbarHost(
+                hostState = snackbar,
+                modifier = Modifier.align(Alignment.TopCenter).windowInsetsPadding(WindowInsets.statusBars),
+            )
+        }
     }
 }

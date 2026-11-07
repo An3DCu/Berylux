@@ -53,7 +53,12 @@ fun CasesScreen(
     LaunchedEffect(viewModel, resources) {
         viewModel.messageFlow.collect { message ->
             val text = when (message) {
-                is CasesMessage.Closed -> resources.getString(R.string.cases_closed, message.title, message.lux)
+                // Only your own challenges pay nothing, and they show no Lux.
+                is CasesMessage.Closed -> if (message.lux == 0) {
+                    resources.getString(R.string.cases_closed_own, message.title)
+                } else {
+                    resources.getString(R.string.cases_closed, message.title, message.lux)
+                }
                 is CasesMessage.Dropped -> resources.getString(R.string.cases_dropped, message.title, message.lux)
                 CasesMessage.WentCold -> resources.getString(R.string.cases_went_cold)
                 CasesMessage.Failed -> resources.getString(R.string.cases_failed)
