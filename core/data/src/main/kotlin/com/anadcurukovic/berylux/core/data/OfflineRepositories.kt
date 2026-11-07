@@ -1,6 +1,5 @@
 package com.anadcurukovic.berylux.core.data
 
-import android.database.sqlite.SQLiteConstraintException
 import com.anadcurukovic.berylux.core.database.asEntity
 import com.anadcurukovic.berylux.core.database.asModel
 import com.anadcurukovic.berylux.core.database.dao.AchievementDao
@@ -25,6 +24,7 @@ import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.Challenge
 import com.anadcurukovic.berylux.core.model.Difficulty
+import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
 import com.anadcurukovic.berylux.core.model.Profile
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
@@ -68,10 +68,10 @@ internal class OfflineChallengeRepository @Inject constructor(
 
     override suspend fun challenge(id: Long): Challenge? = challengeDao.get(id)?.asModel()
 
-    override suspend fun addCustom(categoryId: Long, title: String, description: String, difficulty: Difficulty): Long =
+    override suspend fun addCustom(title: String, description: String, difficulty: Difficulty): Long =
         challengeDao.insert(
             ChallengeEntity(
-                categoryId = categoryId,
+                categoryId = MY_CASES_CATEGORY_ID,
                 title = title,
                 description = description,
                 difficulty = difficulty,
@@ -84,11 +84,7 @@ internal class OfflineChallengeRepository @Inject constructor(
         challengeDao.update(challenge.asEntity())
     }
 
-    override suspend fun deleteCustom(id: Long): Boolean = try {
-        challengeDao.deleteCustom(id) > 0
-    } catch (_: SQLiteConstraintException) {
-        false
-    }
+    override suspend fun deleteCustom(id: Long): Boolean = challengeDao.deleteCustom(id) > 0
 }
 
 internal class OfflineCaseRepository @Inject constructor(
@@ -124,6 +120,8 @@ internal class OfflineCaseRepository @Inject constructor(
         dao.close(caseId, at, on, luxEarned) > 0
 
     override suspend fun drop(caseId: Long): Boolean = dao.setStatusIfOpen(caseId, CaseStatus.DROPPED) > 0
+
+    override suspend fun markColdBefore(profileId: Long, day: LocalDate): Int = dao.markColdBefore(profileId, day)
 
     private fun CaseWithChallenge.asCaseFile() = CaseFile(case = case.asModel(), challenge = challenge.asModel())
 }

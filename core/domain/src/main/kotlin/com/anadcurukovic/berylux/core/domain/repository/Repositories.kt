@@ -37,11 +37,12 @@ interface ChallengeRepository {
 
     suspend fun challenge(id: Long): Challenge?
 
-    suspend fun addCustom(categoryId: Long, title: String, description: String, difficulty: Difficulty): Long
+    /** Custom challenges always go in "My cases". */
+    suspend fun addCustom(title: String, description: String, difficulty: Difficulty): Long
 
     suspend fun updateCustom(challenge: Challenge)
 
-    /** False when the challenge isn't custom or still has cases. */
+    /** Deletes a custom challenge and its cases. False when it isn't custom or doesn't exist. */
     suspend fun deleteCustom(id: Long): Boolean
 }
 
@@ -60,6 +61,9 @@ interface CaseRepository {
 
     /** False when the case isn't open any more. */
     suspend fun drop(caseId: Long): Boolean
+
+    /** Cases still open from a day before [day] go cold. Returns how many did. */
+    suspend fun markColdBefore(profileId: Long, day: LocalDate): Int
 }
 
 interface AchievementRepository {

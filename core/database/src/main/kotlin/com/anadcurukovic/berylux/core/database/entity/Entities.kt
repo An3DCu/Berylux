@@ -52,10 +52,7 @@ data class ChallengeEntity(
     @ColumnInfo(name = "is_custom") val isCustom: Boolean = false,
 )
 
-/**
- * A case keeps its challenge: a challenge with cases can't be deleted. Removing a custom challenge
- * without losing its history is decided with the editor in the core loop round.
- */
+/** Deleting a custom challenge deletes its cases too (version 2). */
 @Entity(
     tableName = "cases",
     foreignKeys = [
@@ -69,7 +66,7 @@ data class ChallengeEntity(
             entity = ChallengeEntity::class,
             parentColumns = ["id"],
             childColumns = ["challenge_id"],
-            onDelete = ForeignKey.RESTRICT,
+            onDelete = ForeignKey.CASCADE,
         ),
     ],
     indices = [

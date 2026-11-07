@@ -12,6 +12,7 @@ import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.Challenge
 import com.anadcurukovic.berylux.core.model.Difficulty
+import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
 import com.anadcurukovic.berylux.core.model.Profile
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
@@ -51,8 +52,8 @@ class FakeChallengeRepository(
     private val categoryState = MutableStateFlow(categories)
     private val challengeState = MutableStateFlow(challenges)
 
-    /** Ids of challenges that have cases; deleting them fails, as in the database. */
-    val inUse = mutableSetOf<Long>()
+    /** Called with the id of a deleted challenge, so the fake cases can go with it. */
+    internal var onDeleted: (Long) -> Unit = {}
 
     override val categories: Flow<List<Category>> = categoryState
     override val challenges: Flow<List<Challenge>> = challengeState
@@ -62,10 +63,10 @@ class FakeChallengeRepository(
 
     override suspend fun challenge(id: Long): Challenge? = challengeState.value.firstOrNull { it.id == id }
 
-    override suspend fun addCustom(categoryId: Long, title: String, description: String, difficulty: Difficulty): Long {
+    override suspend fun addCustom(title: String, description: String, difficulty: Difficulty): Long {
         val id = (challengeState.value.maxOfOrNull { it.id } ?: 0) + 1
         challengeState.update {
-            it + Challenge(id, categoryId, title, description, difficulty, isCustom = true)
+            it + Challenge(id, MY_CASES_CATEGORY_ID, title, description, difficulty, isCustom = true)
         }
         return id
     }
@@ -77,8 +78,9 @@ class FakeChallengeRepository(
 
     override suspend fun deleteCustom(id: Long): Boolean {
         val target = challengeState.value.firstOrNull { it.id == id }
-        if (target == null || !target.isCustom || id in inUse) return false
+        if (target == null || !target.isCustom) return false
         challengeState.update { list -> list.filterNot { it.id == id } }
+        onDeleted(id)
         return true
     }
 }
@@ -86,6 +88,10 @@ class FakeChallengeRepository(
 class FakeCaseRepository(private val challenges: FakeChallengeRepository) : CaseRepository {
     private val cases = MutableStateFlow(emptyList<Pair<Long, Case>>())
     private var nextId = 1L
+
+    init {
+        challenges.onDeleted = { id -> cases.update { list -> list.filterNot { it.second.challengeId == id } } }
+    }
 
     override fun caseFiles(profileId: Long): Flow<List<CaseFile>> =
         combine(cases, challenges.challenges) { all, challengeList ->
@@ -115,7 +121,6 @@ class FakeCaseRepository(private val challenges: FakeChallengeRepository) : Case
         val id = nextId++
         val case = Case(id, challengeId, CaseStatus.OPEN, isDaily, acceptedAt = at, acceptedOn = on)
         cases.update { it + (profileId to case) }
-        challenges.inUse += challengeId
         return id
     }
 
@@ -125,6 +130,16 @@ class FakeCaseRepository(private val challenges: FakeChallengeRepository) : Case
         }
 
     override suspend fun drop(caseId: Long): Boolean = changeIfOpen(caseId) { it.copy(status = CaseStatus.DROPPED) }
+
+    override suspend fun markColdBefore(profileId: Long, day: LocalDate): Int {
+        val goingCold = cases.value.filter { (owner, case) ->
+            owner == profileId && case.status == CaseStatus.OPEN && case.acceptedOn.isBefore(day)
+        }
+        cases.update { list ->
+            list.map { if (it in goingCold) it.first to it.second.copy(status = CaseStatus.COLD) else it }
+        }
+        return goingCold.size
+    }
 
     private fun changeIfOpen(caseId: Long, change: (Case) -> Case): Boolean {
         val found = cases.value.firstOrNull { it.second.id == caseId && it.second.status == CaseStatus.OPEN }

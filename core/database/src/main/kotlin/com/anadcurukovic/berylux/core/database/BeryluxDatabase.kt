@@ -22,7 +22,7 @@ import com.anadcurukovic.berylux.core.database.entity.ProfileEntity
         CaseEntity::class,
         AchievementUnlockEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(TimeConverters::class)
