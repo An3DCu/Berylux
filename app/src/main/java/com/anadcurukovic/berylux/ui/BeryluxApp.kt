@@ -58,8 +58,9 @@ private fun BeryluxTabs(modifier: Modifier = Modifier) {
         catalogEntries(
             onOpenCategory = { navigator.navigate(CategoryRoute(it)) },
             onNewChallenge = { navigator.navigate(EditorRoute()) },
+            onEditChallenge = { navigator.navigate(EditorRoute(it)) },
         )
-        editorEntries()
+        editorEntries(onDone = { navigator.goBack() })
         progressEntries(onOpenRivals = { navigator.navigate(RivalsRoute) })
         rivalsEntries()
         profileEntries(onOpenSettings = { navigator.navigate(SettingsRoute) })

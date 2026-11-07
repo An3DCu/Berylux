@@ -66,13 +66,11 @@ class OfflineRepositoriesTest {
     @Test
     fun `custom challenges go in My cases and take their cases with them when deleted`() = runTest {
         val profile = profiles.createGuest("Guest", pickSeed = 42)
-        val id = challenges.addCustom(
-            title = "Read a poem",
-            description = "",
-            difficulty = Difficulty.EASY,
-        )
-        challenges.updateCustom(challenges.challenge(id)!!.copy(title = "Read two poems"))
+        val id = challenges.addCustom(title = "Read a poem", description = "")
+        assertThat(challenges.updateCustom(id, title = "Read two poems", description = "Out loud")).isTrue()
         assertThat(challenges.challenge(id)!!.title).isEqualTo("Read two poems")
+        assertThat(challenges.updateCustom(1, title = "Not mine", description = "")).isFalse()
+        assertThat(challenges.challenge(1)!!.title).isEqualTo("Stretch break")
 
         assertThat(challenges.challenge(id)!!.categoryId).isEqualTo(MY_CASES_CATEGORY_ID)
 

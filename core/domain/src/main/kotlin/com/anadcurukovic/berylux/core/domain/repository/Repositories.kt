@@ -38,10 +38,14 @@ interface ChallengeRepository {
 
     suspend fun challenge(id: Long): Challenge?
 
-    /** Custom challenges always go in "My cases". */
-    suspend fun addCustom(title: String, description: String, difficulty: Difficulty): Long
+    /**
+     * Custom challenges always go in "My cases". They have no difficulty: the column can't be
+     * empty, so they're stored as [Difficulty.EASY], which no screen or rule ever reads.
+     */
+    suspend fun addCustom(title: String, description: String): Long
 
-    suspend fun updateCustom(challenge: Challenge)
+    /** Changes a custom challenge's title and description. False when it isn't custom or doesn't exist. */
+    suspend fun updateCustom(id: Long, title: String, description: String): Boolean
 
     /** Deletes a custom challenge and its cases. False when it isn't custom or doesn't exist. */
     suspend fun deleteCustom(id: Long): Boolean

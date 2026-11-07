@@ -1,7 +1,9 @@
 package com.anadcurukovic.berylux.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
@@ -12,6 +14,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.anadcurukovic.berylux.MainActivity
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -55,6 +58,15 @@ class BeryluxAppTest {
     private fun pressBack() {
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.waitForIdle()
+    }
+
+    /** The catalog is a lazy list: cards below the screen only exist once scrolled to. */
+    private fun openCategory(name: String) {
+        assertOn("Catalog")
+        compose.waitUntilAtLeastOneExists(hasText("Body"), timeoutMillis = 5_000)
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(name))
+        tap(name)
+        assertOn(name)
     }
 
     private fun startAs(name: String) {
@@ -114,6 +126,33 @@ class BeryluxAppTest {
     }
 
     @Test
+    fun aChallengeYouWriteCanBeTakenThenDeleted() {
+        startAs("Sam")
+        tap("Catalog")
+        openCategory("My cases")
+        waitForText("You haven't written any yet.")
+        tap("New challenge")
+        assertOn("New challenge")
+        compose.onNode(hasSetTextAction() and hasText("Title")).performTextInput("Call grandma")
+        tap("Save")
+
+        assertOn("My cases")
+        waitForText("Call grandma")
+        tap("Take it")
+        waitForText("Taken: Call grandma")
+
+        tap("Edit")
+        assertOn("Edit challenge")
+        tap("Delete")
+        // The case is still open, so no streak day can go with it.
+        waitForText("Its case goes with it.")
+        compose.onAllNodesWithText("may leave your streak", substring = true).assertCountEquals(0)
+        compose.onAllNodesWithText("Delete").onLast().performClick()
+        assertOn("My cases")
+        waitForText("You haven't written any yet.")
+    }
+
+    @Test
     fun anEmptyCasesTabLeadsToToday() {
         startAs("Sam")
         tap("Cases")
@@ -126,14 +165,15 @@ class BeryluxAppTest {
     fun backWalksDownTheTabThenToTodayThenLeaves() {
         startAs("Sam")
         tap("Catalog")
-        tap("Open a category")
+        openCategory("My cases")
         tap("New challenge")
         assertOn("New challenge")
 
         pressBack()
-        assertOn("Category 1")
+        assertOn("My cases")
         pressBack()
-        assertOn("Catalog")
+        // The catalog kept its place near My cases, below its heading.
+        waitForText("Big, rare jobs.")
         pressBack()
         assertOn("Daily case")
         pressBack()
@@ -144,11 +184,11 @@ class BeryluxAppTest {
     fun eachTabRemembersWhereYouWere() {
         startAs("Sam")
         tap("Catalog")
-        tap("Open a category")
+        openCategory("Body")
         tap("Cases")
         assertOn("Earlier")
         tap("Catalog")
-        assertOn("Category 1")
+        assertOn("Body")
     }
 
     @Test
@@ -176,8 +216,8 @@ class BeryluxAppTest {
     fun thePlaceSurvivesARecreate() {
         startAs("Sam")
         tap("Catalog")
-        tap("Open a category")
+        openCategory("Mind")
         compose.activityRule.scenario.recreate()
-        assertOn("Category 1")
+        assertOn("Mind")
     }
 }
