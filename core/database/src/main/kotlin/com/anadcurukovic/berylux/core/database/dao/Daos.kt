@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Update
 import com.anadcurukovic.berylux.core.database.entity.AchievementUnlockEntity
 import com.anadcurukovic.berylux.core.database.entity.CaseEntity
 import com.anadcurukovic.berylux.core.database.entity.CaseWithChallenge
@@ -59,8 +58,9 @@ interface ChallengeDao {
     @Insert
     suspend fun insert(challenge: ChallengeEntity): Long
 
-    @Update
-    suspend fun update(challenge: ChallengeEntity)
+    /** Only custom challenges can be changed. Returns how many rows changed. */
+    @Query("UPDATE challenges SET title = :title, description = :description WHERE id = :id AND is_custom = 1")
+    suspend fun updateCustom(id: Long, title: String, description: String): Int
 
     /** Only custom challenges can be deleted. Returns how many rows went. */
     @Query("DELETE FROM challenges WHERE id = :id AND is_custom = 1")

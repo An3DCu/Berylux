@@ -131,3 +131,33 @@ class CaseActionsTest {
         }
     }
 }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class TodaysCasesTest {
+    private val time = FakeTimeSource(Instant.parse("2026-11-06T14:00:00Z"))
+    private val challenges = FakeChallengeRepository(
+        challenges = listOf(Challenge(1, 1, "Brisk walk", "", Difficulty.EASY)),
+    )
+    private val profiles = FakeProfileRepository(
+        Profile(id = 1, name = "Sam", lux = 0, pickSeed = 42, createdAt = Instant.EPOCH),
+    )
+    private val cases = FakeCaseRepository(challenges, profiles)
+    private val todaysCases = TodaysCases(profiles, cases, GameClock(time, FakeSettingsRepository()))
+
+    @Test
+    fun `today follows new cases and moves to the next day at 4 AM`() = runTest {
+        val today = LocalDate.of(2026, 11, 6)
+        todaysCases().test {
+            assertThat(awaitItem().cases).isEmpty()
+            cases.accept(1, 1, isDaily = false, at = time.now(), on = today)
+            assertThat(awaitItem().cases).hasSize(1)
+
+            time.instant = Instant.parse("2026-11-07T03:00:00Z") // 04:00 local on the 7th
+            testScheduler.advanceTimeBy(1.minutes.inWholeMilliseconds + 1)
+            val next = awaitItem()
+            assertThat(next.day).isEqualTo(today.plusDays(1))
+            assertThat(next.cases).isEmpty()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+}

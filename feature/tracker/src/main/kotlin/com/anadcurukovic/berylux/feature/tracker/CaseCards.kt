@@ -25,6 +25,14 @@ import com.anadcurukovic.berylux.core.ui.label
 @Composable
 internal fun CaseCard(case: CaseUi, onClose: (CaseUi) -> Unit, onDrop: (CaseUi) -> Unit) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    // Your own challenges give no Lux, so they show none; a drop still costs it.
+    val custom = case.file.challenge.isCustom
+    val luxLine = when (case.status) {
+        CaseStatus.OPEN -> if (custom) "" else stringResource(R.string.cases_lux_pays, case.lux)
+        CaseStatus.CLOSED -> if (custom) "" else stringResource(R.string.cases_lux_earned, case.lux)
+        CaseStatus.DROPPED -> stringResource(R.string.cases_lux_cost, case.lux)
+        CaseStatus.COLD -> stringResource(R.string.cases_went_cold_note)
+    }
     OutlinedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -32,22 +40,18 @@ internal fun CaseCard(case: CaseUi, onClose: (CaseUi) -> Unit, onDrop: (CaseUi) 
                 Text(case.status.label(), style = MaterialTheme.typography.labelMedium, color = muted)
             }
             Text(
-                text = stringResource(
-                    R.string.cases_card_meta,
-                    case.categoryName,
-                    case.file.challenge.difficulty.label(),
-                ),
+                // Your own challenges have no difficulty.
+                text = if (custom) {
+                    case.categoryName
+                } else {
+                    stringResource(R.string.cases_card_meta, case.categoryName, case.file.challenge.difficulty.label())
+                },
                 style = MaterialTheme.typography.labelMedium,
                 color = muted,
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = when (case.status) {
-                        CaseStatus.OPEN -> stringResource(R.string.cases_lux_pays, case.lux)
-                        CaseStatus.CLOSED -> stringResource(R.string.cases_lux_earned, case.lux)
-                        CaseStatus.DROPPED -> stringResource(R.string.cases_lux_cost, case.lux)
-                        CaseStatus.COLD -> stringResource(R.string.cases_went_cold_note)
-                    },
+                    text = luxLine,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.weight(1f),
                 )

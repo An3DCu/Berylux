@@ -72,17 +72,20 @@ class FakeChallengeRepository(
 
     override suspend fun challenge(id: Long): Challenge? = challengeState.value.firstOrNull { it.id == id }
 
-    override suspend fun addCustom(title: String, description: String, difficulty: Difficulty): Long {
+    override suspend fun addCustom(title: String, description: String): Long {
         val id = (challengeState.value.maxOfOrNull { it.id } ?: 0) + 1
         challengeState.update {
-            it + Challenge(id, MY_CASES_CATEGORY_ID, title, description, difficulty, isCustom = true)
+            it + Challenge(id, MY_CASES_CATEGORY_ID, title, description, Difficulty.EASY, isCustom = true)
         }
         return id
     }
 
-    override suspend fun updateCustom(challenge: Challenge) {
-        require(challenge.isCustom) { "only custom challenges can be changed" }
-        challengeState.update { list -> list.map { if (it.id == challenge.id) challenge else it } }
+    override suspend fun updateCustom(id: Long, title: String, description: String): Boolean {
+        if (challengeState.value.none { it.id == id && it.isCustom }) return false
+        challengeState.update { list ->
+            list.map { if (it.id == id) it.copy(title = title, description = description) else it }
+        }
+        return true
     }
 
     override suspend fun deleteCustom(id: Long): Boolean {

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Lux is a unit, like km: "1 Lux", "500 Lux". -->
+    <string name="catalog_title">Catalog</string>
+    <plurals name="catalog_count">
+        <item quantity="one">%d challenge</item>
+        <item quantity="other">%d challenges</item>
+    </plurals>
+    <string name="catalog_error">The catalog couldn\'t be loaded. Restart the app to try again.</string>
+
+    <string name="category_filter_all">All</string>
+    <string name="category_lux" tools:ignore="PluralsCandidate">+%1$d Lux</string>
+    <string name="category_take">Take it</string>
+    <string name="category_taken">Taken</string>
+    <string name="category_on_today">On Today</string>
+    <string name="category_edit">Edit</string>
+    <string name="category_new">New challenge</string>
+    <string name="category_my_cases_note">Your own challenges give no Lux, but the days you close them count for your streak.</string>
+    <string name="category_my_cases_empty">You haven\'t written any yet. Tap New challenge to write one.</string>
+    <string name="category_empty">Nothing at this difficulty.</string>
+    <string name="category_not_found">This category isn\'t there any more.</string>
+    <string name="category_error">This category couldn\'t be loaded. Restart the app to try again.</string>
+
+    <string name="category_taken_message">Taken: %1$s</string>
+    <string name="category_day_full">That\'s 5 cases today. Drop one to take another.</string>
+    <string name="category_already_taken">You already have this one today.</string>
+    <string name="category_failed">That didn\'t work. Try again.</string>
+</resources>

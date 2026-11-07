@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources>
+    <string name="editor_new_title">New challenge</string>
+    <string name="editor_edit_title">Edit challenge</string>
+    <string name="editor_note">It goes in My cases. Your own challenges give no Lux, but the days you close them count for your streak.</string>
+    <string name="editor_title_label">Title</string>
+    <string name="editor_description_label">Description (optional)</string>
+    <string name="editor_count">%1$d / %2$d</string>
+    <string name="editor_title_empty">Give it a title.</string>
+    <string name="editor_title_too_long">Keep the title to %1$d characters.</string>
+    <string name="editor_description_too_long">Keep the description to %1$d characters.</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_delete">Delete</string>
+    <string name="editor_failed">That didn\'t work. Try again.</string>
+    <string name="editor_not_found">This challenge isn\'t there any more.</string>
+
+    <string name="editor_delete_title">Delete \"%1$s\"?</string>
+    <plurals name="editor_delete_cases">
+        <item quantity="one">Its case goes with it.</item>
+        <item quantity="other">Its %d cases go with it.</item>
+    </plurals>
+    <!-- Only shown when some of its cases were closed: their days count for the streak. -->
+    <plurals name="editor_delete_streak">
+        <item quantity="one">The day it was closed may leave your streak.</item>
+        <item quantity="other">The days they were closed may leave your streak.</item>
+    </plurals>
+    <string name="editor_delete_text_none">This can\'t be undone.</string>
+    <string name="editor_delete_confirm">Delete</string>
+    <string name="editor_delete_dismiss">Keep it</string>
+</resources>

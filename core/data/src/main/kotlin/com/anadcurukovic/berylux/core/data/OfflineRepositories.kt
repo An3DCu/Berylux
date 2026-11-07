@@ -1,6 +1,5 @@
 package com.anadcurukovic.berylux.core.data
 
-import com.anadcurukovic.berylux.core.database.asEntity
 import com.anadcurukovic.berylux.core.database.asModel
 import com.anadcurukovic.berylux.core.database.dao.AchievementDao
 import com.anadcurukovic.berylux.core.database.dao.CaseDao
@@ -67,21 +66,19 @@ internal class OfflineChallengeRepository @Inject constructor(
 
     override suspend fun challenge(id: Long): Challenge? = challengeDao.get(id)?.asModel()
 
-    override suspend fun addCustom(title: String, description: String, difficulty: Difficulty): Long =
+    override suspend fun addCustom(title: String, description: String): Long =
         challengeDao.insert(
             ChallengeEntity(
                 categoryId = MY_CASES_CATEGORY_ID,
                 title = title,
                 description = description,
-                difficulty = difficulty,
+                difficulty = Difficulty.EASY,
                 isCustom = true,
             ),
         )
 
-    override suspend fun updateCustom(challenge: Challenge) {
-        require(challenge.isCustom) { "only custom challenges can be changed" }
-        challengeDao.update(challenge.asEntity())
-    }
+    override suspend fun updateCustom(id: Long, title: String, description: String): Boolean =
+        challengeDao.updateCustom(id, title, description) > 0
 
     override suspend fun deleteCustom(id: Long): Boolean = challengeDao.deleteCustom(id) > 0
 }
