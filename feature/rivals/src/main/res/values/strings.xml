@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Lux is a unit, like km: "1 Lux", "500 Lux". -->
+    <string name="rivals_title">Rivals</string>
+    <string name="rivals_week">Week of %1$s. Lux earned by closing cases.</string>
+    <string name="rivals_place">%1$d of %2$d this week</string>
+    <string name="rivals_last_week">Last week: %1$d of %2$d</string>
+    <string name="rivals_first_week">Your first week. The bots count from the day you started.</string>
+    <string name="rivals_you">You</string>
+    <string name="rivals_bot">Bot</string>
+    <string name="rivals_lux" tools:ignore="PluralsCandidate">%1$d Lux</string>
+    <string name="rivals_habit_ledger">Steady: about the same every day</string>
+    <string name="rivals_habit_flashbulb">Sprinter: big days, then quiet ones</string>
+    <string name="rivals_habit_snooze">Slacker: skips about half the days</string>
+    <string name="rivals_habit_nightjar">Night owl: does it all in the evening</string>
+    <string name="rivals_habit_grindstone">Grinder: a lot, almost every day</string>
+    <string name="rivals_error">The board couldn\'t be loaded. Restart the app to try again.</string>
+</resources>

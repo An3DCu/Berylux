@@ -8,6 +8,7 @@ import java.time.LocalDate
  * @property freezesBanked freezes ready to save the next missed day.
  * @property frozenDays the missed days a freeze saved in the running streak.
  * @property doneToday whether today already counts. Until today is over, a streak isn't broken.
+ * @property freezesUsed every freeze ever used, in earlier streaks too.
  */
 data class StreakState(
     val current: Int,
@@ -15,6 +16,7 @@ data class StreakState(
     val freezesBanked: Int,
     val frozenDays: List<LocalDate>,
     val doneToday: Boolean,
+    val freezesUsed: Int = 0,
 )
 
 /**
@@ -36,6 +38,7 @@ object Streaks {
         var longest = 0
         var banked = 0
         val frozen = mutableListOf<LocalDate>()
+        var used = 0
 
         var day = days.first()
         while (!day.isAfter(today)) {
@@ -49,6 +52,7 @@ object Streaks {
                 day == today -> Unit
                 current > 0 && banked > 0 -> {
                     banked--
+                    used++
                     frozen += day
                 }
                 else -> {
@@ -66,6 +70,7 @@ object Streaks {
             freezesBanked = banked,
             frozenDays = frozen.toList(),
             doneToday = today in days,
+            freezesUsed = used,
         )
     }
 }

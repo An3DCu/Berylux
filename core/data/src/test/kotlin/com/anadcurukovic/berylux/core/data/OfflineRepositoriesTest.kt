@@ -101,6 +101,6 @@ class OfflineRepositoriesTest {
         val profile = profiles.createGuest("Guest", pickSeed = 42)
         assertThat(achievements.unlock(profile.id, "first_case", now)).isTrue()
         assertThat(achievements.unlock(profile.id, "first_case", now)).isFalse()
-        assertThat(achievements.unlocked(profile.id).first()).containsExactly("first_case")
+        assertThat(achievements.unlocked(profile.id).first()).containsExactly("first_case", now)
     }
 }

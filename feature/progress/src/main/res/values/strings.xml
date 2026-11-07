@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain working copy. The character round rewrites it in the case-file voice. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Lux is a unit, like km: "1 Lux", "500 Lux". -->
+    <string name="progress_title">Progress</string>
+    <string name="progress_rank_line" tools:ignore="PluralsCandidate">%1$s · %2$d Lux</string>
+    <string name="progress_to_next" tools:ignore="PluralsCandidate">%1$d Lux to %2$s</string>
+    <string name="progress_top_rank">Top rank reached</string>
+
+    <string name="progress_streak_title">Streak</string>
+    <plurals name="progress_streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="progress_streak_longest">
+        <item quantity="one">Longest: %d day</item>
+        <item quantity="other">Longest: %d days</item>
+    </plurals>
+    <string name="progress_streak_done_today">Today counts already.</string>
+    <string name="progress_streak_not_yet">Close a case today to keep it going.</string>
+    <string name="progress_freeze_banked">A freeze is banked: it saves the next missed day.</string>
+    <string name="progress_freeze_none">No freeze banked. Every 7 days in a row earn one.</string>
+    <plurals name="progress_frozen_days">
+        <item quantity="one">%d missed day saved by a freeze.</item>
+        <item quantity="other">%d missed days saved by freezes.</item>
+    </plurals>
+
+    <string name="progress_rivals">Rivals this week</string>
+    <string name="progress_achievements_title">Achievements · %1$d of %2$d</string>
+    <string name="progress_new">New</string>
+    <string name="progress_locked">Locked</string>
+    <string name="progress_unlocked_on">Unlocked %1$s</string>
+    <string name="progress_error">Progress couldn\'t be loaded. Restart the app to try again.</string>
+</resources>

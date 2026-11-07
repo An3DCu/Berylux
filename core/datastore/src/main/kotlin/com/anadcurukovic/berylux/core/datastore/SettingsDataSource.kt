@@ -4,11 +4,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Instant
 import javax.inject.Inject
 
 /**
@@ -41,6 +43,15 @@ class SettingsDataSource @Inject constructor(
         dataStore.edit { it[THEME] = theme.name }
     }
 
+    /** Not a setting the player changes: when Progress was last looked at, for its "new" marks. */
+    val achievementsSeenAt: Flow<Instant> = dataStore.data.map { prefs ->
+        Instant.ofEpochMilli(prefs[ACHIEVEMENTS_SEEN_AT] ?: 0L)
+    }
+
+    suspend fun markAchievementsSeen(at: Instant) {
+        dataStore.edit { it[ACHIEVEMENTS_SEEN_AT] = at.toEpochMilli() }
+    }
+
     suspend fun setEffectsLevel(level: Int) {
         require(level in UserSettings.EFFECTS_LEVELS) { "level must be 1 to 5, was $level" }
         dataStore.edit { it[EFFECTS_LEVEL] = level }
@@ -50,5 +61,6 @@ class SettingsDataSource @Inject constructor(
         val DAY_START_HOUR = intPreferencesKey("day_start_hour")
         val THEME = stringPreferencesKey("theme")
         val EFFECTS_LEVEL = intPreferencesKey("effects_level")
+        val ACHIEVEMENTS_SEEN_AT = longPreferencesKey("achievements_seen_at")
     }
 }

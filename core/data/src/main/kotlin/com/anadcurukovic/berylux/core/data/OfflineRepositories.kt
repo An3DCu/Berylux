@@ -125,8 +125,8 @@ internal class OfflineCaseRepository @Inject constructor(
 internal class OfflineAchievementRepository @Inject constructor(
     private val dao: AchievementDao,
 ) : AchievementRepository {
-    override fun unlocked(profileId: Long): Flow<Set<String>> =
-        dao.observeUnlocked(profileId).map { list -> list.map { it.achievementKey }.toSet() }
+    override fun unlocked(profileId: Long): Flow<Map<String, Instant>> =
+        dao.observeUnlocked(profileId).map { list -> list.associate { it.achievementKey to it.unlockedAt } }
 
     override suspend fun unlock(profileId: Long, key: String, at: Instant): Boolean =
         dao.unlock(AchievementUnlockEntity(profileId = profileId, achievementKey = key, unlockedAt = at)) != -1L
@@ -142,6 +142,10 @@ internal class OfflineSettingsRepository @Inject constructor(
     override suspend fun setTheme(theme: ThemeMode) = source.setTheme(theme)
 
     override suspend fun setEffectsLevel(level: Int) = source.setEffectsLevel(level)
+
+    override val achievementsSeenAt: Flow<Instant> = source.achievementsSeenAt
+
+    override suspend fun markAchievementsSeen(at: Instant) = source.markAchievementsSeen(at)
 }
 
 internal class SystemTimeSource @Inject constructor() : TimeSource {

@@ -78,8 +78,8 @@ interface CaseRepository {
 }
 
 interface AchievementRepository {
-    /** The keys of the achievements the profile has unlocked. */
-    fun unlocked(profileId: Long): Flow<Set<String>>
+    /** The keys of the achievements the profile has unlocked, with when each one was. */
+    fun unlocked(profileId: Long): Flow<Map<String, Instant>>
 
     /** False when it was already unlocked. */
     suspend fun unlock(profileId: Long, key: String, at: Instant): Boolean
@@ -93,6 +93,11 @@ interface SettingsRepository {
     suspend fun setTheme(theme: ThemeMode)
 
     suspend fun setEffectsLevel(level: Int)
+
+    /** When the player last looked at Progress; unlocks after it are new. The epoch before the first look. */
+    val achievementsSeenAt: Flow<Instant>
+
+    suspend fun markAchievementsSeen(at: Instant)
 }
 
 /** The clock and the time zone, behind an interface so tests can set the time. */

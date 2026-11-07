@@ -208,8 +208,27 @@ class BeryluxAppTest {
     fun rivalsOpenFromProgress() {
         startAs("Sam")
         tap("Progress")
-        tap("Rivals")
+        tap("Rivals this week")
         assertOn("Rivals")
+        waitForText("Ledger")
+        waitForText("Your first week.")
+    }
+
+    @Test
+    fun closingTheFirstCaseUnlocksAnAchievementAnywhere() {
+        startAs("Sam")
+        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
+        waitForText("Taken:")
+        tap("Cases")
+        waitForText("Today · 1 of 5 cases")
+        tap("Close")
+        tap("Close it")
+        waitForText("Unlocked: First case closed")
+
+        tap("Progress")
+        assertOn("Progress")
+        waitForText("Achievements · 1 of 17")
+        waitForText("New")
     }
 
     @Test

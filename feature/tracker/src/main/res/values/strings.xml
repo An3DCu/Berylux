@@ -32,6 +32,7 @@
     <string name="cases_drop_dismiss">Keep it</string>
 
     <string name="cases_closed" tools:ignore="PluralsCandidate">Closed: %1$s, +%2$d Lux</string>
+    <string name="cases_closed_own">Closed: %1$s</string>
     <string name="cases_dropped" tools:ignore="PluralsCandidate">Dropped: %1$s, −%2$d Lux</string>
     <string name="cases_went_cold">That case went cold when the day ended.</string>
     <string name="cases_failed">That didn\'t work. Try again.</string>
