@@ -54,7 +54,7 @@ private fun BeryluxTabs(modifier: Modifier = Modifier) {
 
     val entryProvider = entryProvider {
         todayEntries(onOpenProfile = { navigator.navigate(ProfileRoute) })
-        casesEntries()
+        casesEntries(onOpenToday = { navigator.navigate(TodayRoute) })
         catalogEntries(
             onOpenCategory = { navigator.navigate(CategoryRoute(it)) },
             onNewChallenge = { navigator.navigate(EditorRoute()) },

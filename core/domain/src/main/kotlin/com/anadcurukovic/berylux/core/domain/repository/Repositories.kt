@@ -57,11 +57,17 @@ interface CaseRepository {
 
     suspend fun accept(profileId: Long, challengeId: Long, isDaily: Boolean, at: Instant, on: LocalDate): Long
 
-    /** False when the case isn't open any more. */
+    /**
+     * Closes an open case and adds [luxEarned] to its profile, both or neither.
+     * False when the case isn't open any more.
+     */
     suspend fun close(caseId: Long, at: Instant, on: LocalDate, luxEarned: Int): Boolean
 
-    /** False when the case isn't open any more. */
-    suspend fun drop(caseId: Long): Boolean
+    /**
+     * Drops an open case and takes [penalty] Lux from its profile, both or neither. Lux never
+     * goes below 0. False when the case isn't open any more.
+     */
+    suspend fun drop(caseId: Long, penalty: Int): Boolean
 
     /** Cases still open from a day before [day] go cold. Returns how many did. */
     suspend fun markColdBefore(profileId: Long, day: LocalDate): Int

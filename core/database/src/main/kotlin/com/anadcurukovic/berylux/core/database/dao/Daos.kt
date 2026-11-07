@@ -99,6 +99,29 @@ interface CaseDao {
     /** Cases still open from a day before [day] go cold. Returns how many did. */
     @Query("UPDATE cases SET status = 'COLD' WHERE profile_id = :profileId AND status = 'OPEN' AND accepted_on < :day")
     suspend fun markColdBefore(profileId: Long, day: LocalDate): Int
+
+    /** Adds [amount] to the Lux of the case's profile; a negative amount takes Lux, never below 0. */
+    @Query(
+        "UPDATE profiles SET lux = MAX(lux + :amount, 0) " +
+            "WHERE id = (SELECT profile_id FROM cases WHERE id = :caseId)",
+    )
+    suspend fun changeOwnerLux(caseId: Long, amount: Int)
+
+    /** Closes an open case and pays its Lux in one transaction. False when it wasn't open. */
+    @Transaction
+    suspend fun closeAndPay(id: Long, at: Instant, on: LocalDate, lux: Int): Boolean {
+        if (close(id, at, on, lux) == 0) return false
+        changeOwnerLux(id, lux)
+        return true
+    }
+
+    /** Drops an open case and takes the penalty in one transaction. False when it wasn't open. */
+    @Transaction
+    suspend fun dropAndCharge(id: Long, penalty: Int): Boolean {
+        if (setStatusIfOpen(id, CaseStatus.DROPPED) == 0) return false
+        changeOwnerLux(id, -penalty)
+        return true
+    }
 }
 
 @Dao

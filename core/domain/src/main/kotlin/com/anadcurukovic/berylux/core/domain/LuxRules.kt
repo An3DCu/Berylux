@@ -9,6 +9,9 @@ object LuxRules {
     const val MEDIUM = 25
     const val HARD = 50
 
+    /** What dropping a case costs. Lux never goes below 0. */
+    const val DROP_PENALTY = 5
+
     // The daily case pays 1.5 times as much, kept as 3 halves so the math stays in whole numbers.
     private const val DAILY_HALVES = 3
 

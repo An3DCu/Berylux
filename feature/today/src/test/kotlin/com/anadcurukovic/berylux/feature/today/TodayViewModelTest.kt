@@ -42,10 +42,10 @@ class TodayViewModelTest {
             (9L..16L).map { Challenge(it, 2, "Mind $it", "", Difficulty.MEDIUM) } +
             (17L..20L).map { Challenge(it, 7, "Long shot $it", "", Difficulty.HARD) },
     )
-    private val cases = FakeCaseRepository(challenges)
     private val profiles = FakeProfileRepository(
         Profile(id = 1, name = "Sam", lux = 600, pickSeed = 42, createdAt = Instant.EPOCH),
     )
+    private val cases = FakeCaseRepository(challenges, profiles)
 
     // 14:00 UTC is 15:00 in Sarajevo: the game day is 6 November.
     private val time = FakeTimeSource(Instant.parse("2026-11-06T14:00:00Z"))

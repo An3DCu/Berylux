@@ -144,6 +144,39 @@ class DaoTest {
         assertThat(db.caseDao().setStatusIfOpen(caseId, CaseStatus.DROPPED)).isEqualTo(0)
     }
 
+    private suspend fun lux(): Int = db.profileDao().observeFirst().first()!!.lux
+
+    @Test
+    fun `closing pays the case's owner once, in the same transaction`() = runTest {
+        val profileId = newProfile()
+        val caseId = accept(profileId, challengeId = 4)
+        assertThat(db.caseDao().closeAndPay(caseId, at = now, on = today, lux = 25)).isTrue()
+        assertThat(db.caseDao().closeAndPay(caseId, at = now, on = today, lux = 25)).isFalse()
+        assertThat(lux()).isEqualTo(25)
+    }
+
+    @Test
+    fun `dropping charges the owner once and never below 0`() = runTest {
+        val profileId = newProfile()
+        db.profileDao().addLux(profileId, 7)
+        val first = accept(profileId, challengeId = 1)
+        val second = accept(profileId, challengeId = 2)
+        assertThat(db.caseDao().dropAndCharge(first, penalty = 5)).isTrue()
+        assertThat(db.caseDao().dropAndCharge(first, penalty = 5)).isFalse()
+        assertThat(lux()).isEqualTo(2)
+        assertThat(db.caseDao().dropAndCharge(second, penalty = 5)).isTrue()
+        assertThat(lux()).isEqualTo(0)
+    }
+
+    @Test
+    fun `a closed case can't be dropped and charged`() = runTest {
+        val profileId = newProfile()
+        val caseId = accept(profileId, challengeId = 1)
+        db.caseDao().closeAndPay(caseId, at = now, on = today, lux = 10)
+        assertThat(db.caseDao().dropAndCharge(caseId, penalty = 5)).isFalse()
+        assertThat(lux()).isEqualTo(10)
+    }
+
     @Test
     fun `cases are listed by the day they were accepted`() = runTest {
         val profileId = newProfile()

@@ -83,12 +83,13 @@ class OfflineRepositoriesTest {
     }
 
     @Test
-    fun `a case is accepted, closed once and shows up with its challenge`() = runTest {
+    fun `a case is accepted, closed once with its Lux paid, and shows up with its challenge`() = runTest {
         val profile = profiles.createGuest("Guest", pickSeed = 42)
         val caseId = cases.accept(profile.id, challengeId = 4, isDaily = true, at = now, on = today)
         assertThat(cases.close(caseId, at = now, on = today, luxEarned = 38)).isTrue()
         assertThat(cases.close(caseId, at = now, on = today, luxEarned = 38)).isFalse()
-        assertThat(cases.drop(caseId)).isFalse()
+        assertThat(cases.drop(caseId, penalty = 5)).isFalse()
+        assertThat(profiles.profile.first()!!.lux).isEqualTo(38)
 
         val file = cases.caseFilesAcceptedOn(profile.id, today).first().single()
         assertThat(file.challenge.title).isEqualTo("Brisk walk")
