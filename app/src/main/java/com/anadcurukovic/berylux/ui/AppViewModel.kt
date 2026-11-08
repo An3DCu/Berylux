@@ -8,6 +8,7 @@ import com.anadcurukovic.berylux.core.domain.repository.AchievementRepository
 import com.anadcurukovic.berylux.core.domain.repository.ProfileRepository
 import com.anadcurukovic.berylux.core.domain.repository.SettingsRepository
 import com.anadcurukovic.berylux.core.model.Achievement
+import com.anadcurukovic.berylux.core.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -51,6 +52,11 @@ class AppViewModel @Inject constructor(
     val state: StateFlow<AppState> = profiles.profile
         .map { if (it == null) AppState.NeedsProfile else AppState.Ready }
         .stateIn(viewModelScope, SharingStarted.Eagerly, AppState.Loading)
+
+    /** The theme picked in Settings; dark until the settings are read. */
+    val theme: StateFlow<ThemeMode> = settings.settings
+        .map { it.theme }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.DARK)
 
     private val unlocks = Channel<Achievement>(Channel.UNLIMITED)
 
