@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
@@ -53,6 +54,11 @@ fun Project.configureUnitTests() {
             "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
             "--add-opens=java.base/java.io=ALL-UNNAMED",
         )
+        // A failing test prints its message and stack trace, so CI's log says why, not just where.
+        testLogging {
+            events("failed")
+            exceptionFormat = TestExceptionFormat.FULL
+        }
     }
     dependencies {
         add("testImplementation", libs.lib("junit4"))
