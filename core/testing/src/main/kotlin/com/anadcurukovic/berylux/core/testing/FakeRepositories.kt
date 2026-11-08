@@ -197,10 +197,10 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
     }
 }
 
-/** A clock that only moves when a test moves it. */
+/** A clock that only moves when a test moves it. Safe to move from the test thread while the app reads it. */
 class FakeTimeSource(
-    var instant: Instant = Instant.parse("2026-11-06T12:00:00Z"),
-    var zoneId: ZoneId = ZoneId.of("Europe/Sarajevo"),
+    @Volatile var instant: Instant = Instant.parse("2026-11-06T12:00:00Z"),
+    @Volatile var zoneId: ZoneId = ZoneId.of("Europe/Sarajevo"),
 ) : TimeSource {
     override fun now(): Instant = instant
 

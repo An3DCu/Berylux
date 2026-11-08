@@ -38,7 +38,9 @@ import com.anadcurukovic.berylux.feature.profile.R
 /** The first screen anyone sees. Stateful: it gets its ViewModel from Hilt. */
 @Composable
 fun WelcomeScreen(modifier: Modifier = Modifier, viewModel: WelcomeViewModel = hiltViewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val flowState by viewModel.state.collectAsStateWithLifecycle()
+    // The field shows the ViewModel's name directly, not the copy that comes through the flow.
+    val state = flowState.copy(name = viewModel.name)
     WelcomeContent(
         state = state,
         onNameChange = viewModel::onNameChange,

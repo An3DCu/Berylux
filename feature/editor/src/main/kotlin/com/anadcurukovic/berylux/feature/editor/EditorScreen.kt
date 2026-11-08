@@ -50,7 +50,11 @@ fun EditorScreen(
         creationCallback = { factory -> factory.create(challengeId) },
     ),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val flowState by viewModel.uiState.collectAsStateWithLifecycle()
+    // The fields show the ViewModel's text directly, not the copy that comes through the flow.
+    val state = (flowState as? EditorUiState.Form)
+        ?.copy(title = viewModel.title, description = viewModel.description)
+        ?: flowState
     val snackbar = remember { SnackbarHostState() }
     val resources = LocalResources.current
     LaunchedEffect(viewModel, resources) {

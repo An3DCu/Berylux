@@ -9,9 +9,16 @@ android {
 
     defaultConfig {
         applicationId = "com.anadcurukovic.berylux"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
+
+        // Instrumented tests start a Hilt test app. The orchestrator clears the app's data before
+        // each one, so every test begins on a fresh install.
+        testInstrumentationRunner = "com.anadcurukovic.berylux.HiltTestRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }
+
+    testOptions.execution = "ANDROIDX_TEST_ORCHESTRATOR"
 
     buildTypes {
         release {
@@ -51,6 +58,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
+    testImplementation(projects.core.testing)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.compose.ui.test.junit4)
@@ -60,5 +68,10 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    // Compose testing brings Espresso 3.5, which crashes on Android 16 and newer.
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
+    androidTestUtil(libs.androidx.test.orchestrator)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

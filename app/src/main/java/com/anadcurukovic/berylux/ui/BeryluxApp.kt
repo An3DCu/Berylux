@@ -1,12 +1,17 @@
 package com.anadcurukovic.berylux.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -112,6 +117,14 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
             NavDisplay(
                 entries = state.toDecoratedEntries(entryProvider),
                 onBack = { navigator.goBack() },
+            )
+            // The screens draw edge to edge. Without this strip, a scrolled list shows through
+            // the clock and the status icons.
+            Spacer(
+                Modifier
+                    .fillMaxWidth()
+                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                    .background(MaterialTheme.colorScheme.background),
             )
             SnackbarHost(
                 hostState = snackbar,

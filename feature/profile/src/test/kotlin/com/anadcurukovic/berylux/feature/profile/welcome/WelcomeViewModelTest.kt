@@ -66,8 +66,18 @@ class WelcomeViewModelTest {
     fun `the name and the sigil survive the process being killed`() {
         val saved = SavedStateHandle()
         val before = viewModel(saved).apply { onNameChange("Sam") }.state.value
-        val after = viewModel(saved).state.value
+        val restored = viewModel(saved)
+        val after = restored.state.value
+        assertThat(restored.name).isEqualTo("Sam")
         assertThat(after.name).isEqualTo("Sam")
         assertThat(after.seed).isEqualTo(before.seed)
+    }
+
+    @Test
+    fun `typing shows in the field text at once`() {
+        val vm = viewModel()
+        vm.onNameChange("Sa")
+        vm.onNameChange("Sam")
+        assertThat(vm.name).isEqualTo("Sam")
     }
 }
