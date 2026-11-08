@@ -1,30 +1,41 @@
 package com.anadcurukovic.berylux.feature.tracker
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.component.CardActions
+import com.anadcurukovic.berylux.core.designsystem.component.CaseCard
+import com.anadcurukovic.berylux.core.designsystem.component.ClosedStamp
+import com.anadcurukovic.berylux.core.designsystem.component.StampButton
+import com.anadcurukovic.berylux.core.designsystem.component.StampOutlineButton
+import com.anadcurukovic.berylux.core.designsystem.hud
 import com.anadcurukovic.berylux.core.domain.LuxRules
 import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.ui.label
+import java.time.format.DateTimeFormatter
 
 /* One case's card, the dialog that asks before closing or dropping, and the status names. */
 
+/**
+ * A case as a sheet from the file. An open one has Drop and Close; a closed one carries the
+ * CLOSED stamp with its date, which drops in when [stampLands].
+ */
 @Composable
-internal fun CaseCard(case: CaseUi, onClose: (CaseUi) -> Unit, onDrop: (CaseUi) -> Unit) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+internal fun CaseFileCard(
+    case: CaseUi,
+    onClose: (CaseUi) -> Unit,
+    onDrop: (CaseUi) -> Unit,
+    modifier: Modifier = Modifier,
+    stampLands: Boolean = false,
+) {
+    val colors = Berylux.colors
     // Your own challenges give no Lux, so they show none; a drop still costs it.
     val custom = case.file.challenge.isCustom
     val luxLine = when (case.status) {
@@ -33,35 +44,50 @@ internal fun CaseCard(case: CaseUi, onClose: (CaseUi) -> Unit, onDrop: (CaseUi) 
         CaseStatus.DROPPED -> stringResource(R.string.cases_lux_cost, case.lux)
         CaseStatus.COLD -> stringResource(R.string.cases_went_cold_note)
     }
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(case.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                Text(case.status.label(), style = MaterialTheme.typography.labelMedium, color = muted)
-            }
-            Text(
-                // Your own challenges have no difficulty.
-                text = if (custom) {
-                    case.categoryName
-                } else {
-                    stringResource(R.string.cases_card_meta, case.categoryName, case.file.challenge.difficulty.label())
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = muted,
-            )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    // Your own challenges have no difficulty.
+    val meta = if (custom) {
+        case.categoryName
+    } else {
+        stringResource(R.string.cases_card_meta, case.categoryName, case.file.challenge.difficulty.label())
+    }
+    CaseCard(modifier = modifier, caseNumber = case.id) {
+        Text(case.title, style = BeryluxType.Title)
+        Text(meta.hud(), style = BeryluxType.Label, color = colors.inkFaded)
+        CardActions(
+            lead = {
                 Text(
-                    text = luxLine,
-                    style = MaterialTheme.typography.labelLarge,
+                    text = luxLine.hud(),
+                    style = BeryluxType.Label,
+                    color = colors.inkFaded,
                     modifier = Modifier.weight(1f),
                 )
-                if (case.status == CaseStatus.OPEN) {
-                    TextButton(onClick = { onDrop(case) }) { Text(stringResource(R.string.cases_drop)) }
-                    Button(onClick = { onClose(case) }) { Text(stringResource(R.string.cases_close)) }
+            },
+        ) {
+            when (case.status) {
+                CaseStatus.OPEN -> {
+                    StampOutlineButton(stringResource(R.string.cases_drop), onClick = { onDrop(case) })
+                    StampButton(stringResource(R.string.cases_close), onClick = { onClose(case) })
                 }
+                CaseStatus.CLOSED -> ClosedStamp(
+                    label = stringResource(R.string.cases_stamp),
+                    date = case.file.case.closedOn?.let { stampDate().format(it).hud() }.orEmpty(),
+                    land = stampLands,
+                )
+                CaseStatus.DROPPED, CaseStatus.COLD -> Text(
+                    text = case.status.label().hud(),
+                    style = BeryluxType.Label,
+                    color = colors.stamp,
+                )
             }
         }
     }
+}
+
+/** The stamp's date, as a filing clerk would ink it: 08 NOV 2026. */
+@Composable
+private fun stampDate(): DateTimeFormatter {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(locale) { DateTimeFormatter.ofPattern("dd MMM yyyy", locale) }
 }
 
 @Composable

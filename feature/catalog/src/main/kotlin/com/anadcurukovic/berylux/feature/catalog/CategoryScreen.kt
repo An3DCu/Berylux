@@ -4,25 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +30,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.StampShape
+import com.anadcurukovic.berylux.core.designsystem.component.CardActions
+import com.anadcurukovic.berylux.core.designsystem.component.CaseCard
+import com.anadcurukovic.berylux.core.designsystem.component.StampButton
+import com.anadcurukovic.berylux.core.designsystem.component.StampOutlineButton
+import com.anadcurukovic.berylux.core.designsystem.hud
 import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.CategoryKind
 import com.anadcurukovic.berylux.core.model.Challenge
@@ -73,8 +75,13 @@ fun CategoryScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
             if ((state as? CategoryUiState.Content)?.isMyCases == true) {
-                ExtendedFloatingActionButton(onClick = onNewChallenge) {
-                    Text(stringResource(R.string.category_new))
+                ExtendedFloatingActionButton(
+                    onClick = onNewChallenge,
+                    shape = StampShape,
+                    containerColor = Berylux.colors.stamp,
+                    contentColor = Berylux.colors.onStamp,
+                ) {
+                    Text(stringResource(R.string.category_new), style = BeryluxType.Button)
                 }
             }
         },
@@ -141,10 +148,10 @@ private fun Header(state: CategoryUiState.Content) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = state.category.name,
-            style = MaterialTheme.typography.headlineSmall,
+            style = BeryluxType.Heading,
             modifier = Modifier.semantics { heading() },
         )
-        Text(state.category.description, style = MaterialTheme.typography.bodyMedium)
+        Text(state.category.description, style = BeryluxType.Text)
         if (state.isMyCases) Note(stringResource(R.string.category_my_cases_note))
     }
 }
@@ -156,14 +163,14 @@ private fun Filters(selected: Difficulty?, onDifficulty: (Difficulty?) -> Unit) 
             FilterChip(
                 selected = selected == null,
                 onClick = { onDifficulty(null) },
-                label = { Text(stringResource(R.string.category_filter_all)) },
+                label = { Text(stringResource(R.string.category_filter_all), style = BeryluxType.Button) },
             )
         }
         items(Difficulty.entries) { difficulty ->
             FilterChip(
                 selected = selected == difficulty,
                 onClick = { onDifficulty(difficulty) },
-                label = { Text(difficulty.label()) },
+                label = { Text(difficulty.label(), style = BeryluxType.Button) },
             )
         }
     }
@@ -172,38 +179,46 @@ private fun Filters(selected: Difficulty?, onDifficulty: (Difficulty?) -> Unit) 
 @Composable
 private fun ChallengeCard(item: ChallengeUi, onTake: (ChallengeUi) -> Unit, onEdit: (Long) -> Unit) {
     val challenge = item.challenge
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(challenge.title, style = MaterialTheme.typography.titleMedium)
-            // Your own challenges have no difficulty and give no Lux.
-            if (!challenge.isCustom) {
+    val colors = Berylux.colors
+    CaseCard {
+        Text(challenge.title, style = BeryluxType.Title)
+        // Your own challenges have no difficulty and give no Lux.
+        if (!challenge.isCustom) {
+            Text(
+                text = challenge.difficulty.label().hud(),
+                style = BeryluxType.Label,
+                color = colors.inkFaded,
+            )
+        }
+        if (challenge.description.isNotEmpty()) {
+            Text(challenge.description, style = BeryluxType.Text)
+        }
+        CardActions(
+            lead = {
+                val lux = if (challenge.isCustom) "" else stringResource(R.string.category_lux, item.lux)
                 Text(
-                    text = challenge.difficulty.label(),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (challenge.description.isNotEmpty()) {
-                Text(challenge.description, style = MaterialTheme.typography.bodyMedium)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = if (challenge.isCustom) "" else stringResource(R.string.category_lux, item.lux),
-                    style = MaterialTheme.typography.labelLarge,
+                    text = lux.hud(),
+                    style = BeryluxType.Label,
+                    color = colors.inkFaded,
                     modifier = Modifier.weight(1f),
                 )
-                if (challenge.isCustom) {
-                    TextButton(onClick = { onEdit(challenge.id) }) { Text(stringResource(R.string.category_edit)) }
-                }
-                when (item.offer) {
-                    Offer.TAKE -> Button(onClick = { onTake(item) }) { Text(stringResource(R.string.category_take)) }
-                    Offer.TAKEN -> OutlinedButton(onClick = {}, enabled = false) {
-                        Text(stringResource(R.string.category_taken))
-                    }
-                    Offer.ON_TODAY -> OutlinedButton(onClick = {}, enabled = false) {
-                        Text(stringResource(R.string.category_on_today))
-                    }
-                }
+            },
+        ) {
+            if (challenge.isCustom) {
+                StampOutlineButton(stringResource(R.string.category_edit), onClick = { onEdit(challenge.id) })
+            }
+            when (item.offer) {
+                Offer.TAKE -> StampButton(stringResource(R.string.category_take), onClick = { onTake(item) })
+                Offer.TAKEN -> StampOutlineButton(
+                    stringResource(R.string.category_taken),
+                    onClick = {},
+                    enabled = false
+                )
+                Offer.ON_TODAY -> StampOutlineButton(
+                    stringResource(R.string.category_on_today),
+                    onClick = {},
+                    enabled = false
+                )
             }
         }
     }
@@ -212,13 +227,13 @@ private fun ChallengeCard(item: ChallengeUi, onTake: (ChallengeUi) -> Unit, onEd
 @Composable
 private fun Message(text: String, modifier: Modifier) {
     Box(modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-        Text(text, style = MaterialTheme.typography.bodyLarge)
+        Text(text, style = BeryluxType.Text)
     }
 }
 
 @Composable
 private fun Note(text: String) {
-    Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(text = text, style = BeryluxType.Text, color = Berylux.colors.onBackgroundFaded)
 }
 
 @Preview
@@ -229,7 +244,7 @@ private fun CategoryPreview() {
         lux = lux,
         offer = offer,
     )
-    MaterialTheme {
+    BeryluxTheme {
         CategoryContent(
             state = CategoryUiState.Content(
                 category = Category(1, "Body", "Moving, strength and stamina.", CategoryKind.REGULAR),

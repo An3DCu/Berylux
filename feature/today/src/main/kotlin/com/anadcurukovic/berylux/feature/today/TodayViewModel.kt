@@ -11,6 +11,7 @@ import com.anadcurukovic.berylux.core.domain.GameClock
 import com.anadcurukovic.berylux.core.domain.LuxRules
 import com.anadcurukovic.berylux.core.domain.RankProgress
 import com.anadcurukovic.berylux.core.domain.RankRules
+import com.anadcurukovic.berylux.core.domain.Streaks
 import com.anadcurukovic.berylux.core.domain.repository.CaseRepository
 import com.anadcurukovic.berylux.core.domain.repository.ChallengeRepository
 import com.anadcurukovic.berylux.core.domain.repository.ProfileRepository
@@ -60,6 +61,7 @@ sealed interface TodayUiState {
         val picks: List<PickUi>,
         val filters: List<Category>,
         val selectedFilter: Long?,
+        val streak: Int = 0,
     ) : TodayUiState {
         val limit: Int get() = DailyCap.LIMIT
         val dayFull: Boolean get() = used >= limit
@@ -111,8 +113,13 @@ class TodayViewModel @Inject constructor(
         .map { it.profile.id to it.day }
         .flatMapLatest { (profileId, day) -> cases.caseFilesAcceptedOn(profileId, day) }
 
-    val uiState: StateFlow<TodayUiState> = combine(base, todaysCases, filter) { b, todays, selected ->
-        content(b, todays, selected)
+    /** The current streak, for the sign. */
+    private val streak: Flow<Int> = base
+        .map { it.profile.id to it.day }
+        .flatMapLatest { (profileId, day) -> cases.closedDays(profileId).map { Streaks.calculate(it, day).current } }
+
+    val uiState: StateFlow<TodayUiState> = combine(base, todaysCases, filter, streak) { b, todays, selected, days ->
+        content(b, todays, selected).copy(streak = days)
     }
         .catch<TodayUiState> { emit(TodayUiState.Error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), TodayUiState.Loading)

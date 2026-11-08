@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.anadcurukovic.berylux.core.domain.CaseActions
 import com.anadcurukovic.berylux.core.domain.GameClock
+import com.anadcurukovic.berylux.core.domain.Narration
 import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.CategoryKind
@@ -132,6 +133,26 @@ class CasesViewModelTest {
         assertThat(content().pending).isNull()
         assertThat(content().today.single().status).isEqualTo(CaseStatus.CLOSED)
         assertThat(lux()).isEqualTo(125)
+    }
+
+    @Test
+    fun `a closed case keeps its stamp and the narrator's line until the player leaves`() = runTest {
+        take(1)
+        keepCollecting()
+        val case = content().today.single()
+
+        viewModel.onClose(case)
+        viewModel.messageFlow.test {
+            viewModel.onConfirm()
+            awaitItem()
+        }
+        val just = content().justClosed
+        assertThat(just?.caseId).isEqualTo(case.id)
+        assertThat(just?.narration).isEqualTo(Narration.Close)
+        assertThat(just?.line).isIn(0 until NarratorPool.CLOSE)
+
+        viewModel.onLeave()
+        assertThat(content().justClosed).isNull()
     }
 
     @Test

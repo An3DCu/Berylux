@@ -2,6 +2,7 @@ package com.anadcurukovic.berylux.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
@@ -45,26 +46,29 @@ class MainFlowTest {
 
     @Test
     fun closingTheDailyCaseMovesLuxRankAndStreak() {
-        compose.waitUntilAtLeastOneExists(hasText("Welcome to Berylux") and isHeading(), timeoutMillis = 10_000)
+        compose.waitUntilAtLeastOneExists(
+            hasContentDescription("Welcome to Berylux") and isHeading(),
+            timeoutMillis = 10_000,
+        )
         compose.onNode(hasSetTextAction()).performTextInput("Sam")
-        tap("Start")
-        waitForText("Goshenite · 0 Lux")
-        waitForText("500 Lux to Heliodor")
+        tap("Open the first file")
+        waitForText("GOSHENITE · 0 LUX")
 
-        waitForText("Take it")
-        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
-        waitForText("1 of 5 cases today")
+        waitForText("Take the case")
+        compose.onAllNodesWithText("Take the case").onFirst().performScrollTo().performClick()
+        waitForText("ON THE DESK: 1 OF 5")
         tap("Cases")
         compose.waitUntilAtLeastOneExists(hasText("Close"), timeoutMillis = 10_000)
         tap("Close")
-        tap("Close it")
-        waitForText("Lux earned")
+        tap("Case closed")
+        waitForText("LUX EARNED")
 
         tap("Today")
-        compose.waitUntilDoesNotExist(hasText("Goshenite · 0 Lux"), timeoutMillis = 10_000)
-        compose.onAllNodesWithText("500 Lux to Heliodor").assertCountEquals(0)
+        compose.waitUntilDoesNotExist(hasText("GOSHENITE · 0 LUX"), timeoutMillis = 10_000)
         tap("Progress")
-        waitForText("1 day")
-        waitForText("Today counts already.")
+        compose.waitUntilAtLeastOneExists(hasText("LUX TO HELIODOR", substring = true), timeoutMillis = 10_000)
+        compose.onAllNodesWithText("500 LUX TO HELIODOR", substring = true).assertCountEquals(0)
+        waitForText("1 DAY ·")
+        waitForText("Today's on the record.")
     }
 }

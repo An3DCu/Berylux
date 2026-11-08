@@ -15,5 +15,5 @@
     <string name="rivals_habit_snooze">Slacker: skips about half the days</string>
     <string name="rivals_habit_nightjar">Night owl: does it all in the evening</string>
     <string name="rivals_habit_grindstone">Grinder: a lot, almost every day</string>
-    <string name="rivals_error">The board couldn\'t be loaded. Restart the app to try again.</string>
+    <string name="rivals_error">The board wouldn\'t open. Restart the app to try again.</string>
 </resources>

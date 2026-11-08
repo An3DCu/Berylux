@@ -1,5 +1,8 @@
 package com.anadcurukovic.berylux.feature.tracker
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,17 +14,18 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -30,6 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.component.StampButton
 import com.anadcurukovic.berylux.core.model.Case
 import com.anadcurukovic.berylux.core.model.CaseFile
 import com.anadcurukovic.berylux.core.model.CaseStatus
@@ -49,6 +57,11 @@ fun CasesScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    // Leaving Cases ends the stamp and the narrator's line; turning the phone doesn't.
+    val context = LocalContext.current
+    DisposableEffect(viewModel) {
+        onDispose { if (context.findActivity()?.isChangingConfigurations != true) viewModel.onLeave() }
+    }
     val resources = LocalResources.current
     LaunchedEffect(viewModel, resources) {
         viewModel.messageFlow.collect { message ->
@@ -80,6 +93,12 @@ fun CasesScreen(
     }
 }
 
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 /** Cases, stateless. */
 @Composable
 fun CasesContent(
@@ -107,11 +126,18 @@ fun CasesContent(
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            item { Heading(stringResource(R.string.cases_heading)) }
             item { SectionTitle(stringResource(R.string.cases_today_title, state.used, state.limit)) }
             if (state.today.isEmpty()) {
                 item { EmptyToday(onOpenToday) }
             }
-            items(state.today, key = { it.id }) { CaseCard(it, onClose, onDrop) }
+            items(state.today, key = { it.id }) { case ->
+                val just = state.justClosed?.takeIf { it.caseId == case.id }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CaseFileCard(case, onClose, onDrop, stampLands = just != null)
+                    just?.let { NarratorLine(it) }
+                }
+            }
             history(state.history)
         }
     }
@@ -124,15 +150,20 @@ private fun LazyListScope.history(days: List<DayUi>) {
     }
     days.forEach { day ->
         item(key = "day-${day.day}") { DayHeader(day) }
-        items(day.cases, key = { it.id }) { CaseCard(it, onClose = {}, onDrop = {}) }
+        items(day.cases, key = { it.id }) { CaseFileCard(it, onClose = {}, onDrop = {}) }
     }
+}
+
+@Composable
+private fun Heading(text: String) {
+    Text(text = text, style = BeryluxType.Heading, modifier = Modifier.semantics { heading() })
 }
 
 @Composable
 private fun SectionTitle(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleMedium,
+        style = BeryluxType.Subheading,
         modifier = Modifier.padding(top = 8.dp).semantics { heading() },
     )
 }
@@ -141,7 +172,7 @@ private fun SectionTitle(text: String) {
 private fun EmptyToday(onOpenToday: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Note(stringResource(R.string.cases_today_empty))
-        OutlinedButton(onClick = onOpenToday) { Text(stringResource(R.string.cases_go_to_today)) }
+        StampButton(stringResource(R.string.cases_go_to_today), onClick = onOpenToday)
     }
 }
 
@@ -150,7 +181,8 @@ private fun DayHeader(day: DayUi) {
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
     Text(
         text = stringResource(R.string.cases_day_summary, formatter.format(day.day), day.closed, day.luxEarned),
-        style = MaterialTheme.typography.labelLarge,
+        style = BeryluxType.Label,
+        color = Berylux.colors.onBackgroundFaded,
         modifier = Modifier.padding(top = 4.dp).semantics { heading() },
     )
 }
@@ -172,7 +204,7 @@ private fun CasesPreview() {
         categoryName = "Body",
         lux = lux,
     )
-    MaterialTheme {
+    BeryluxTheme {
         CasesContent(
             state = CasesUiState.Content(
                 today = listOf(

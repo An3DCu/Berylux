@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Placeholder: a cut gem outline. The real icon is designed in the character round. -->
+<!-- The cut red beryl from the rank gems, drawn from the same seven facets, inside the icon's safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="@color/red_beryl"
-        android:strokeLineJoin="round"
-        android:strokeWidth="2.5"
-        android:pathData="M42,38 L66,38 L76,49 L54,74 L32,49 Z M32,49 L76,49 M42,38 L54,74 M66,38 L54,74 M48,49 L54,38 L60,49" />
+    <group
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="22"
+        android:translateY="19">
+        <path android:fillColor="#E43A64" android:pathData="M28,14 L52,14 L60,30 L20,30 Z" />
+        <path android:fillColor="#B51C45" android:pathData="M28,14 L20,30 L8,30 Z" />
+        <path android:fillColor="#B51C45" android:pathData="M52,14 L72,30 L60,30 Z" />
+        <path android:fillColor="#7A0F2B" android:pathData="M8,30 L72,30 L72,34 L8,34 Z" />
+        <path android:fillColor="#9E1538" android:pathData="M8,34 L28,34 L40,74 Z" />
+        <path android:fillColor="#B51C45" android:pathData="M28,34 L52,34 L40,74 Z" />
+        <path android:fillColor="#7A0F2B" android:pathData="M52,34 L72,34 L40,74 Z" />
+    </group>
 </vector>

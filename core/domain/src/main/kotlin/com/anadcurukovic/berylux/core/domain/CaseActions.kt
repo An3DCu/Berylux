@@ -14,7 +14,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 sealed interface CloseResult {
-    data class Closed(val lux: Int) : CloseResult
+    /** [narration] is what the narrator says about it. */
+    data class Closed(val lux: Int, val narration: Narration = Narration.Close) : CloseResult
 
     /** Its day ended before it was closed. It's cold now and can't be closed. */
     data object WentCold : CloseResult
@@ -50,9 +51,15 @@ class CaseActions @Inject constructor(
         val profile = profiles.profile.first() ?: return CloseResult.NoProfile
         val today = clock.today()
         val lux = LuxRules.forCase(file.challenge, file.case.isDaily)
+        // Read before closing: whether today already counted, for the narrator's milestone.
+        val closedDays = cases.closedDays(profile.id).first()
         return when {
             wentCold(file, profile.id, today) -> CloseResult.WentCold
-            cases.close(file.case.id, time.now(), today, lux) -> CloseResult.Closed(lux)
+            cases.close(file.case.id, time.now(), today, lux) -> {
+                val rankUp = RankRules.rankFor(profile.lux + lux) > RankRules.rankFor(profile.lux)
+                val newStreak = if (today in closedDays) null else Streaks.calculate(closedDays + today, today).current
+                CloseResult.Closed(lux, NarratorRules.narration(rankUp, newStreak))
+            }
             else -> CloseResult.NotOpen
         }
     }

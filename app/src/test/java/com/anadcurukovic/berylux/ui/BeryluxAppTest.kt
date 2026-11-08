@@ -69,6 +69,10 @@ class BeryluxAppTest {
     private fun assertOn(title: String) =
         compose.waitUntilAtLeastOneExists(hasText(title) and isHeading(), timeoutMillis = 5_000)
 
+    /** The welcome screen's title is the wordmark, a heading TalkBack reads as "Welcome to Berylux". */
+    private fun assertOnWelcome() =
+        compose.waitUntilAtLeastOneExists(hasContentDescription("Welcome to Berylux") and isHeading(), 5_000)
+
     /** Waits for the text first: right after a tab change, the next screen may still be loading. */
     private fun tap(text: String) {
         compose.waitUntilAtLeastOneExists(hasText(text), timeoutMillis = 5_000)
@@ -82,7 +86,7 @@ class BeryluxAppTest {
 
     /** The catalog is a lazy list: cards below the screen only exist once scrolled to. */
     private fun openCategory(name: String) {
-        assertOn("Catalog")
+        assertOn("Archive")
         compose.waitUntilAtLeastOneExists(hasText("Body"), timeoutMillis = 5_000)
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(name))
         tap(name)
@@ -91,22 +95,22 @@ class BeryluxAppTest {
 
     /** Takes the first case Today still offers. [taken] is how many the day has after it. */
     private fun takeFirstCase(taken: Int) {
-        waitForText("Take it")
-        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
-        waitForText("$taken of 5 cases today")
+        waitForText("Take the case")
+        compose.onAllNodesWithText("Take the case").onFirst().performScrollTo().performClick()
+        waitForText("ON THE DESK: $taken OF 5")
     }
 
     private fun closeFirstOpenCase() {
         compose.waitUntilAtLeastOneExists(hasText("Close"), timeoutMillis = 5_000)
         compose.onAllNodesWithText("Close").onFirst().performClick()
-        tap("Close it")
-        waitForText("Lux earned")
+        tap("Case closed")
+        waitForText("LUX EARNED")
     }
 
     private fun startAs(name: String) {
-        assertOn("Welcome to Berylux")
+        assertOnWelcome()
         compose.onNode(hasSetTextAction()).performTextInput(name)
-        tap("Start")
+        tap("Open the first file")
         assertOn("Daily case")
     }
 
@@ -114,46 +118,46 @@ class BeryluxAppTest {
     fun firstLaunchAsksForANameThenOpensToday() {
         startAs("Sam")
         waitForText("Sam")
-        waitForText("0 of 5 cases today")
+        waitForText("ON THE DESK: 0 OF 5")
     }
 
     @Test
     fun startingWithoutANameSaysWhy() {
-        assertOn("Welcome to Berylux")
-        tap("Start")
-        waitForText("Enter a name to start.")
+        assertOnWelcome()
+        tap("Open the first file")
+        waitForText("Every detective needs a name.")
     }
 
     @Test
     fun takingACaseUsesASlot() {
         startAs("Sam")
-        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
-        waitForText("Taken:")
-        waitForText("1 of 5 cases today")
+        compose.onAllNodesWithText("Take the case").onFirst().performScrollTo().performClick()
+        waitForText("On your desk:")
+        waitForText("ON THE DESK: 1 OF 5")
     }
 
     @Test
     fun aCaseTakenOnTodayIsClosedFromCasesAfterAYes() {
         startAs("Sam")
-        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
-        waitForText("Taken:")
+        compose.onAllNodesWithText("Take the case").onFirst().performScrollTo().performClick()
+        waitForText("On your desk:")
         tap("Cases")
         waitForText("Today · 1 of 5 cases")
         tap("Close")
-        tap("Close it")
-        waitForText("Closed:")
-        waitForText("Lux earned")
+        tap("Case closed")
+        waitForText("Case closed:")
+        waitForText("LUX EARNED")
     }
 
     @Test
     fun droppingACaseAsksFirstAndCostsFiveLux() {
         startAs("Sam")
-        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
-        waitForText("Taken:")
+        compose.onAllNodesWithText("Take the case").onFirst().performScrollTo().performClick()
+        waitForText("On your desk:")
         tap("Cases")
         waitForText("Today · 1 of 5 cases")
         tap("Drop")
-        waitForText("It costs 5 Lux and frees the slot.")
+        waitForText("Dropping it costs 5 Lux and frees a spot on the desk.")
         compose.onAllNodesWithText("Drop").onLast().performClick()
         waitForText("Dropped:")
         waitForText("Today · 0 of 5 cases")
@@ -165,18 +169,18 @@ class BeryluxAppTest {
         tap("Catalog")
         openCategory("My cases")
         waitForText("You haven't written any yet.")
-        tap("New challenge")
-        assertOn("New challenge")
+        tap("Write a case")
+        assertOn("Write a case")
         compose.onNode(hasSetTextAction() and hasText("Title")).performTextInput("Call grandma")
-        tap("Save")
+        tap("File it")
 
         assertOn("My cases")
         waitForText("Call grandma")
-        tap("Take it")
-        waitForText("Taken: Call grandma")
+        tap("Take the case")
+        waitForText("On your desk: Call grandma")
 
         tap("Edit")
-        assertOn("Edit challenge")
+        assertOn("Edit the case")
         tap("Delete")
         // The case is still open, so no streak day can go with it.
         waitForText("Its case goes with it.")
@@ -190,8 +194,8 @@ class BeryluxAppTest {
     fun anEmptyCasesTabLeadsToToday() {
         startAs("Sam")
         tap("Cases")
-        waitForText("No cases today.")
-        tap("Go to Today")
+        waitForText("The desk is clear.")
+        tap("Open the docket")
         assertOn("Daily case")
     }
 
@@ -200,8 +204,8 @@ class BeryluxAppTest {
         startAs("Sam")
         tap("Catalog")
         openCategory("My cases")
-        tap("New challenge")
-        assertOn("New challenge")
+        tap("Write a case")
+        assertOn("Write a case")
 
         pressBack()
         assertOn("My cases")
@@ -220,7 +224,7 @@ class BeryluxAppTest {
         tap("Catalog")
         openCategory("Body")
         tap("Cases")
-        assertOn("Earlier")
+        assertOn("Earlier days")
         tap("Catalog")
         assertOn("Body")
     }
@@ -251,17 +255,17 @@ class BeryluxAppTest {
     @Test
     fun closingTheFirstCaseUnlocksAnAchievementAnywhere() {
         startAs("Sam")
-        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
-        waitForText("Taken:")
+        compose.onAllNodesWithText("Take the case").onFirst().performScrollTo().performClick()
+        waitForText("On your desk:")
         tap("Cases")
         waitForText("Today · 1 of 5 cases")
         tap("Close")
-        tap("Close it")
-        waitForText("Unlocked: First case closed")
+        tap("Case closed")
+        waitForText("On the record: First case closed")
 
         tap("Progress")
-        assertOn("Progress")
-        waitForText("Achievements · 1 of 17")
+        assertOn("Your record")
+        waitForText("Commendations · 1 of 17")
         waitForText("New")
     }
 
@@ -277,11 +281,11 @@ class BeryluxAppTest {
     @Test
     fun closingTheDailyCaseMovesLuxRankAndStreak() {
         startAs("Sam")
-        waitForText("Goshenite · 0 Lux")
-        waitForText("500 Lux to Heliodor")
+        waitForText("GOSHENITE · 0 LUX")
         tap("Progress")
-        assertOn("Progress")
-        waitForText("0 days")
+        assertOn("Your record")
+        waitForText("500 LUX TO HELIODOR")
+        waitForText("0 DAYS")
 
         tap("Today")
         takeFirstCase(taken = 1)
@@ -289,11 +293,11 @@ class BeryluxAppTest {
         closeFirstOpenCase()
 
         tap("Today")
-        compose.waitUntilDoesNotExist(hasText("Goshenite · 0 Lux"), timeoutMillis = 5_000)
-        compose.onAllNodesWithText("500 Lux to Heliodor").assertCountEquals(0)
+        compose.waitUntilDoesNotExist(hasText("GOSHENITE · 0 LUX"), timeoutMillis = 5_000)
         tap("Progress")
-        waitForText("1 day")
-        waitForText("Today counts already.")
+        compose.waitUntilDoesNotExist(hasText("500 LUX TO HELIODOR", substring = true), timeoutMillis = 5_000)
+        waitForText("1 DAY ·")
+        waitForText("Today's on the record.")
     }
 
     @Test
@@ -311,18 +315,18 @@ class BeryluxAppTest {
 
         // 4:01 AM: Monday's game day. The open case went cold; the closed one stays closed.
         clockTo("2026-11-09T03:01:00Z")
-        waitForText("No cases today.")
-        waitForText("Went cold when its day ended")
+        waitForText("The desk is clear.")
+        waitForText("WENT COLD WHEN ITS DAY ENDED")
         tap("Progress")
-        waitForText("1 day")
+        waitForText("1 DAY ·")
         waitForText("Close a case today to keep it going.")
 
         tap("Today")
-        waitForText("0 of 5 cases today")
+        waitForText("ON THE DESK: 0 OF 5")
         takeFirstCase(taken = 1)
         tap("Cases")
         closeFirstOpenCase()
         tap("Progress")
-        waitForText("2 days")
+        waitForText("2 DAYS ·")
     }
 }

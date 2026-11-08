@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Berylux</string>
     <!-- Shown over any screen when an achievement unlocks. -->
-    <string name="unlocked">Unlocked: %1$s</string>
+    <string name="unlocked">On the record: %1$s</string>
 </resources>

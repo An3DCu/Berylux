@@ -8,14 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -33,16 +31,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.component.BeryluxSign
+import com.anadcurukovic.berylux.core.designsystem.component.CaseCard
+import com.anadcurukovic.berylux.core.designsystem.component.Gem
+import com.anadcurukovic.berylux.core.designsystem.component.RankRuler
+import com.anadcurukovic.berylux.core.designsystem.component.StampOutlineButton
+import com.anadcurukovic.berylux.core.designsystem.hud
 import com.anadcurukovic.berylux.core.domain.RankRules
 import com.anadcurukovic.berylux.core.domain.StreakState
 import com.anadcurukovic.berylux.core.model.Achievement
+import com.anadcurukovic.berylux.core.ui.gemPalette
 import com.anadcurukovic.berylux.core.ui.label
 import com.anadcurukovic.berylux.core.ui.textRes
 import com.anadcurukovic.berylux.core.ui.titleRes
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 /** Progress, stateful. Each time it comes into view, it marks what's new since the last look. */
 @Composable
@@ -58,7 +65,7 @@ fun ProgressScreen(
     }
 }
 
-/** Progress, stateless. */
+/** Progress, stateless: the record, with the rank's gem, the streak's sign and the commendations. */
 @Composable
 fun ProgressContent(
     state: ProgressUiState,
@@ -71,7 +78,7 @@ fun ProgressContent(
             CircularProgressIndicator()
         }
         ProgressUiState.Error -> Box(modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.progress_error), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.progress_error), style = BeryluxType.Text)
         }
         is ProgressUiState.Content -> LazyColumn(
             modifier = modifier.fillMaxSize(),
@@ -83,21 +90,24 @@ fun ProgressContent(
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { Title(stringResource(R.string.progress_title), MaterialTheme.typography.headlineSmall) }
-            item { RankCard(state) }
-            item { StreakCard(state.streak) }
+            item { Title(stringResource(R.string.progress_title), BeryluxType.Heading) }
+            item { RankSection(state) }
+            item { StreakSection(state.streak) }
             item {
-                OutlinedButton(onClick = onOpenRivals, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.progress_rivals))
-                }
+                StampOutlineButton(
+                    text = stringResource(R.string.progress_rivals),
+                    onClick = onOpenRivals,
+                    modifier = Modifier.fillMaxWidth(),
+                    onDesk = true,
+                )
             }
             item {
                 Title(
                     stringResource(R.string.progress_achievements_title, state.unlockedCount, state.achievements.size),
-                    MaterialTheme.typography.titleMedium,
+                    BeryluxType.Subheading,
                 )
             }
-            items(state.achievements, key = { it.achievement.key }) { AchievementRow(it) }
+            items(state.achievements, key = { it.achievement.key }) { AchievementCard(it) }
         }
     }
 }
@@ -108,99 +118,112 @@ private fun Title(text: String, style: TextStyle) {
 }
 
 @Composable
-private fun RankCard(state: ProgressUiState.Content) {
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                text = stringResource(R.string.progress_rank_line, state.rank.rank.label(), state.lux),
-                style = MaterialTheme.typography.titleMedium,
+private fun RankSection(state: ProgressUiState.Content) {
+    val colors = Berylux.colors
+    val rankName = state.rank.rank.label()
+    val next = state.rank.next
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Gem(
+                palette = state.rank.rank.gemPalette(),
+                contentDescription = rankName,
+                modifier = Modifier.size(GEM_SIZE.dp),
+                sweep = true,
             )
-            LinearProgressIndicator(progress = { state.rank.fraction }, modifier = Modifier.fillMaxWidth())
-            val next = state.rank.next
-            Text(
-                text = if (next == null) {
+            Column {
+                Text(rankName, style = BeryluxType.Subheading)
+                val toNext = if (next == null) {
                     stringResource(R.string.progress_top_rank)
                 } else {
                     stringResource(R.string.progress_to_next, state.rank.luxToNext, next.label())
-                },
-                style = MaterialTheme.typography.bodyMedium,
+                }
+                Text(
+                    text = stringResource(R.string.progress_lux_line, state.lux, toNext).hud(),
+                    style = BeryluxType.Label,
+                    color = colors.onBackgroundFaded,
+                )
+            }
+        }
+        RankRuler(fraction = state.rank.fraction, contentDescription = stringResource(R.string.progress_rank_progress))
+    }
+}
+
+@Composable
+private fun StreakSection(streak: StreakState) {
+    val colors = Berylux.colors
+    val days = pluralStringResource(R.plurals.progress_streak_days, streak.current, streak.current)
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Title(stringResource(R.string.progress_streak_title), BeryluxType.Subheading)
+        BeryluxSign(streakDays = streak.current, contentDescription = days)
+        val longest = pluralStringResource(R.plurals.progress_streak_longest, streak.longest, streak.longest)
+        Text(
+            text = "$days · $longest".hud(),
+            style = BeryluxType.Label,
+            color = colors.onBackgroundFaded,
+        )
+        Text(
+            text = stringResource(
+                if (streak.doneToday) R.string.progress_streak_done_today else R.string.progress_streak_not_yet,
+            ),
+            style = BeryluxType.Text,
+        )
+        Text(
+            text = stringResource(
+                if (streak.freezesBanked > 0) R.string.progress_freeze_banked else R.string.progress_freeze_none,
+            ),
+            style = BeryluxType.Text,
+            color = colors.onBackgroundFaded,
+        )
+        if (streak.frozenDays.isNotEmpty()) {
+            Text(
+                text = pluralStringResource(
+                    R.plurals.progress_frozen_days,
+                    streak.frozenDays.size,
+                    streak.frozenDays.size,
+                ),
+                style = BeryluxType.Text,
+                color = colors.onBackgroundFaded,
             )
         }
     }
 }
 
+/** An earned commendation is a paper card with its date; a sealed one is faded. */
 @Composable
-private fun StreakCard(streak: StreakState) {
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringResource(R.string.progress_streak_title), style = MaterialTheme.typography.labelLarge)
+private fun AchievementCard(item: AchievementUi) {
+    val colors = Berylux.colors
+    val locale = LocalConfiguration.current.locales[0]
+    val formatter = remember(locale) { DateTimeFormatter.ofPattern("dd MMM yyyy", locale) }
+    val earned = item.unlockedAt != null
+    CaseCard(modifier = if (earned) Modifier else Modifier.alpha(SEALED_ALPHA)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = pluralStringResource(R.plurals.progress_streak_days, streak.current, streak.current),
-                style = MaterialTheme.typography.headlineMedium,
+                text = stringResource(item.achievement.titleRes()),
+                style = BeryluxType.Title,
+                modifier = Modifier.weight(1f),
             )
-            Text(
-                text = pluralStringResource(R.plurals.progress_streak_longest, streak.longest, streak.longest),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = stringResource(
-                    if (streak.doneToday) R.string.progress_streak_done_today else R.string.progress_streak_not_yet,
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = stringResource(
-                    if (streak.freezesBanked > 0) R.string.progress_freeze_banked else R.string.progress_freeze_none,
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (streak.frozenDays.isNotEmpty()) {
-                Text(
-                    text = pluralStringResource(
-                        R.plurals.progress_frozen_days,
-                        streak.frozenDays.size,
-                        streak.frozenDays.size,
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            if (item.isNew) {
+                Text(stringResource(R.string.progress_new), style = BeryluxType.Button, color = colors.stamp)
             }
         }
+        Text(stringResource(item.achievement.textRes()), style = BeryluxType.Text)
+        Text(
+            text = item.unlockedAt?.let {
+                stringResource(R.string.progress_unlocked_on, formatter.format(it.atZone(ZoneId.systemDefault())))
+            }?.hud() ?: stringResource(R.string.progress_locked).hud(),
+            style = BeryluxType.Label,
+            color = if (earned) colors.stamp else colors.inkFaded,
+        )
     }
 }
 
-@Composable
-private fun AchievementRow(item: AchievementUi) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = stringResource(item.achievement.titleRes()),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (item.unlockedAt == null) muted else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f),
-                )
-                if (item.isNew) Badge { Text(stringResource(R.string.progress_new)) }
-            }
-            Text(stringResource(item.achievement.textRes()), style = MaterialTheme.typography.bodyMedium)
-            Text(
-                text = item.unlockedAt?.let {
-                    stringResource(R.string.progress_unlocked_on, formatter.format(it.atZone(ZoneId.systemDefault())))
-                } ?: stringResource(R.string.progress_locked),
-                style = MaterialTheme.typography.labelMedium,
-                color = muted,
-            )
-        }
-    }
-}
+private const val GEM_SIZE = 72
+private const val SEALED_ALPHA = 0.55f
 
 @Preview
 @Composable
 private fun ProgressPreview() {
-    MaterialTheme {
+    BeryluxTheme {
         ProgressContent(
             state = ProgressUiState.Content(
                 lux = 640,

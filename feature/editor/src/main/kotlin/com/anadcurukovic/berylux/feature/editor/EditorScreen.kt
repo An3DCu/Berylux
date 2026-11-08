@@ -12,9 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,6 +35,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.component.StampButton
+import com.anadcurukovic.berylux.core.designsystem.component.StampOutlineButton
 import com.anadcurukovic.berylux.core.domain.ChallengeProblem
 import com.anadcurukovic.berylux.core.domain.ChallengeRules
 
@@ -97,7 +100,7 @@ fun EditorContent(
             CircularProgressIndicator()
         }
         EditorUiState.NotFound -> Box(modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.editor_not_found), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.editor_not_found), style = BeryluxType.Text)
         }
         is EditorUiState.Form -> Form(
             state,
@@ -125,13 +128,13 @@ private fun Form(
     ) {
         Text(
             text = stringResource(if (state.isNew) R.string.editor_new_title else R.string.editor_edit_title),
-            style = MaterialTheme.typography.headlineSmall,
+            style = BeryluxType.Heading,
             modifier = Modifier.semantics { heading() },
         )
         Text(
             text = stringResource(R.string.editor_note),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = BeryluxType.Text,
+            color = Berylux.colors.onBackgroundFaded,
         )
         val titleProblem = when {
             ChallengeProblem.TITLE_EMPTY in state.problems -> stringResource(R.string.editor_title_empty)
@@ -174,13 +177,19 @@ private fun Form(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             modifier = Modifier.fillMaxWidth(),
         )
-        Button(onClick = onSave, enabled = !state.saving, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.editor_save))
-        }
+        StampButton(
+            text = stringResource(R.string.editor_save),
+            onClick = onSave,
+            enabled = !state.saving,
+            modifier = Modifier.fillMaxWidth(),
+        )
         if (!state.isNew) {
-            TextButton(onClick = onDelete, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.editor_delete), color = MaterialTheme.colorScheme.error)
-            }
+            StampOutlineButton(
+                text = stringResource(R.string.editor_delete),
+                onClick = onDelete,
+                modifier = Modifier.fillMaxWidth(),
+                onDesk = true,
+            )
         }
     }
 }
@@ -209,7 +218,7 @@ private fun DeleteDialog(state: EditorUiState.Form, onConfirm: () -> Unit, onDis
 @Preview
 @Composable
 private fun EditorPreview() {
-    MaterialTheme {
+    BeryluxTheme {
         EditorContent(
             state = EditorUiState.Form(
                 isNew = false,

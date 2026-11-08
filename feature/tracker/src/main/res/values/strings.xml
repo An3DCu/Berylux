@@ -3,10 +3,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Lux is a unit, like km: "1 Lux", "500 Lux". The day always has 5 slots. -->
     <string name="cases_today_title" tools:ignore="PluralsCandidate">Today · %1$d of %2$d cases</string>
-    <string name="cases_today_empty">No cases today. Take one on from Today.</string>
-    <string name="cases_go_to_today">Go to Today</string>
-    <string name="cases_history_title">Earlier</string>
-    <string name="cases_history_empty">Nothing earlier yet.</string>
+    <string name="cases_today_empty">The desk is clear. Pick up a case from the docket.</string>
+    <string name="cases_go_to_today">Open the docket</string>
+    <string name="cases_history_title">Earlier days</string>
+    <string name="cases_history_empty">No earlier files yet.</string>
     <string name="cases_day_summary" tools:ignore="PluralsCandidate">%1$s · %2$d closed · +%3$d Lux</string>
 
     <string name="cases_card_meta">%1$s · %2$s</string>
@@ -22,19 +22,51 @@
     <string name="cases_drop">Drop</string>
 
     <string name="cases_close_title">Close \"%1$s\"?</string>
-    <string name="cases_close_text" tools:ignore="PluralsCandidate">You get %1$d Lux. A closed case can\'t be opened again.</string>
-    <string name="cases_close_text_custom">Your own cases give no Lux, but the day counts for your streak.</string>
-    <string name="cases_close_confirm">Close it</string>
+    <string name="cases_close_text" tools:ignore="PluralsCandidate">It pays %1$d Lux. Once it\'s closed, it stays closed.</string>
+    <string name="cases_close_text_custom">Your own cases pay no Lux, but the day still counts for your streak.</string>
+    <string name="cases_close_confirm">Case closed</string>
     <string name="cases_close_dismiss">Not yet</string>
     <string name="cases_drop_title">Drop \"%1$s\"?</string>
-    <string name="cases_drop_text" tools:ignore="PluralsCandidate">It costs %1$d Lux and frees the slot.</string>
+    <string name="cases_drop_text" tools:ignore="PluralsCandidate">Dropping it costs %1$d Lux and frees a spot on the desk.</string>
     <string name="cases_drop_confirm">Drop</string>
     <string name="cases_drop_dismiss">Keep it</string>
 
-    <string name="cases_closed" tools:ignore="PluralsCandidate">Closed: %1$s, +%2$d Lux</string>
-    <string name="cases_closed_own">Closed: %1$s</string>
-    <string name="cases_dropped" tools:ignore="PluralsCandidate">Dropped: %1$s, −%2$d Lux</string>
-    <string name="cases_went_cold">That case went cold when the day ended.</string>
-    <string name="cases_failed">That didn\'t work. Try again.</string>
-    <string name="cases_error">Your cases couldn\'t be loaded. Restart the app to try again.</string>
+    <string name="cases_closed" tools:ignore="PluralsCandidate">Case closed: %1$s. +%2$d Lux.</string>
+    <string name="cases_closed_own">Case closed: %1$s.</string>
+    <string name="cases_dropped" tools:ignore="PluralsCandidate">Dropped: %1$s. −%2$d Lux.</string>
+    <string name="cases_went_cold">Too late. That case went cold when the day ended.</string>
+    <string name="cases_failed">That didn\'t go through. Try again.</string>
+    <string name="cases_error">The case files wouldn\'t open. Restart the app to try again.</string>
+
+    <string name="cases_heading">Case files</string>
+    <string name="cases_stamp">CLOSED</string>
+
+    <!-- The narrator, under a freshly closed case. Never the same line twice in a row. -->
+    <string-array name="narrator_close">
+        <item>Another one for the files.</item>
+        <item>Clean work.</item>
+        <item>You said you\'d do it. You did it.</item>
+        <item>Case closed. The coffee\'s still warm.</item>
+        <item>Not every case is big, but this one was.</item>
+        <item>One more off the desk.</item>
+        <item>Quiet day, honest work.</item>
+        <item>The city didn\'t notice. You did.</item>
+        <item>That\'s the job. That\'s the whole job.</item>
+        <item>File it under done.</item>
+        <item>No loose ends on this one.</item>
+        <item>Somewhere, a ledger balances.</item>
+    </string-array>
+    <string-array name="narrator_rank_up">
+        <item>New rank. Same desk, better light.</item>
+        <item>They\'ll have to change the nameplate.</item>
+        <item>Took a while. Worth every case.</item>
+        <item>The gem\'s a shade deeper now.</item>
+        <item>Moving up. The old files won\'t miss you.</item>
+        <item>Promotion\'s on the record.</item>
+    </string-array>
+    <string name="narrator_day_7">Seven days running. The sign\'s lit end to end.</string>
+    <string name="narrator_day_14">Two weeks. The neon\'s running deeper.</string>
+    <string name="narrator_day_21">Three weeks. People are starting to talk.</string>
+    <string name="narrator_day_28">Four weeks. One more day and it\'s stamped.</string>
+    <string name="narrator_day_29">Stamped. This streak is on the record.</string>
 </resources>

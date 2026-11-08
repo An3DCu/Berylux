@@ -1,5 +1,6 @@
 package com.anadcurukovic.berylux.feature.rivals
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +27,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.CaseCardShape
+import com.anadcurukovic.berylux.core.designsystem.hud
 import com.anadcurukovic.berylux.core.domain.BoardRow
 import com.anadcurukovic.berylux.core.domain.RivalBoard
 import com.anadcurukovic.berylux.core.model.Rival
@@ -55,7 +58,7 @@ fun RivalsContent(
             CircularProgressIndicator()
         }
         RivalsUiState.Error -> Box(modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.rivals_error), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.rivals_error), style = BeryluxType.Text)
         }
         is RivalsUiState.Content -> LazyColumn(
             modifier = modifier.fillMaxSize(),
@@ -79,56 +82,55 @@ fun RivalsContent(
 private fun Header(board: RivalBoard) {
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
     val size = board.rows.size
+    val colors = Berylux.colors
     Column(Modifier.padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = stringResource(R.string.rivals_title),
-            style = MaterialTheme.typography.headlineSmall,
+            style = BeryluxType.Heading,
             modifier = Modifier.semantics { heading() },
         )
         Text(
             stringResource(R.string.rivals_week, formatter.format(board.weekStart)),
-            style = MaterialTheme.typography.bodyMedium,
+            style = BeryluxType.Text,
         )
-        Text(stringResource(R.string.rivals_place, board.place, size), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.rivals_place, board.place, size), style = BeryluxType.Subheading)
         Text(
             text = board.lastWeekPlace?.let { stringResource(R.string.rivals_last_week, it, size) }
                 ?: stringResource(R.string.rivals_first_week),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = BeryluxType.Text,
+            color = colors.onBackgroundFaded,
         )
     }
 }
 
 @Composable
 private fun BoardRowCard(place: Int, row: BoardRow) {
-    val content = @Composable {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text("$place", style = MaterialTheme.typography.titleLarge, modifier = Modifier.width(28.dp))
-            Column(Modifier.weight(1f)) {
+    val colors = Berylux.colors
+    // The player's row is a sheet of paper; the bots' sit on the desk, a step up.
+    val sheet = if (row.isYou) colors.paper else colors.raised
+    val text = if (row.isYou) colors.ink else colors.onBackground
+    val faded = if (row.isYou) colors.inkFaded else colors.onBackgroundFaded
+    Row(
+        modifier = Modifier.fillMaxWidth().background(sheet, CaseCardShape).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("$place", style = BeryluxType.Subheading, color = text, modifier = Modifier.width(28.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = row.rival?.handle ?: stringResource(R.string.rivals_you),
+                style = BeryluxType.Title,
+                color = text,
+            )
+            row.rival?.let { rival ->
                 Text(
-                    text = row.rival?.handle ?: stringResource(R.string.rivals_you),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = (stringResource(R.string.rivals_bot) + " · " + stringResource(rival.habit())).hud(),
+                    style = BeryluxType.Label,
+                    color = faded,
                 )
-                row.rival?.let { rival ->
-                    Text(
-                        text = stringResource(R.string.rivals_bot) + " · " + stringResource(rival.habit()),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
-            Text(stringResource(R.string.rivals_lux, row.lux), style = MaterialTheme.typography.titleMedium)
         }
-    }
-    // The player's row stands out; the bots' are outlined.
-    if (row.isYou) {
-        Card(Modifier.fillMaxWidth()) { content() }
-    } else {
-        OutlinedCard(Modifier.fillMaxWidth()) { content() }
+        Text(stringResource(R.string.rivals_lux, row.lux).hud(), style = BeryluxType.Number, color = text)
     }
 }
 
@@ -143,7 +145,7 @@ private fun Rival.habit(): Int = when (this) {
 @Preview
 @Composable
 private fun RivalsPreview() {
-    MaterialTheme {
+    BeryluxTheme {
         RivalsContent(
             RivalsUiState.Content(
                 RivalBoard(

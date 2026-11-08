@@ -130,6 +130,31 @@ class CaseActionsTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `the close that makes a seven-day streak brings the milestone, a second one that day doesn't`() = runTest {
+        // Six days in a row closed before today.
+        for (daysAgo in 6L downTo 1L) {
+            val day = today.minusDays(daysAgo)
+            val id = cases.accept(1, 1, isDaily = false, at = time.now(), on = day)
+            cases.close(id, at = time.now(), on = day, luxEarned = 10)
+        }
+        assertThat(actions.close(take(1))).isEqualTo(CloseResult.Closed(10, Narration.Milestone(7)))
+        assertThat(actions.close(take(2))).isEqualTo(CloseResult.Closed(25, Narration.Close))
+    }
+
+    @Test
+    fun `the close that reaches a new rank brings the rank-up`() = runTest {
+        // Heliodor starts at 500 Lux; a Medium case pays 25.
+        val nearRank = FakeProfileRepository(
+            Profile(id = 1, name = "Sam", lux = 490, pickSeed = 42, createdAt = Instant.EPOCH),
+        )
+        val nearCases = FakeCaseRepository(challenges, nearRank)
+        val nearActions = CaseActions(nearRank, nearCases, clock, time)
+        val id = nearCases.accept(1, 2, isDaily = false, at = time.now(), on = today)
+        val file = nearCases.caseFiles(1).first().single { it.case.id == id }
+        assertThat(nearActions.close(file)).isEqualTo(CloseResult.Closed(25, Narration.RankUp))
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
