@@ -1,6 +1,7 @@
 package com.anadcurukovic.berylux.core.domain
 
 import app.cash.turbine.test
+import com.anadcurukovic.berylux.core.domain.repository.AchievementRepository
 import com.anadcurukovic.berylux.core.model.Achievement
 import com.anadcurukovic.berylux.core.model.Case
 import com.anadcurukovic.berylux.core.model.CaseFile
@@ -20,6 +21,7 @@ import com.anadcurukovic.berylux.core.testing.FakeTimeSource
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -194,5 +196,34 @@ class UnlockAchievementsUseCaseTest {
             cancelAndIgnoreRemainingEvents()
         }
         assertThat(achievements.unlocked(1).first()).containsKey(Achievement.FIRST_CLOSED.key)
+    }
+
+    @Test
+    fun `it still comes through when the Lux changes while the unlock is stored`() = runTest {
+        // Like Room: the write is done, then the profile's new Lux arrives before the unlock returns.
+        val racing = object : AchievementRepository by achievements {
+            override suspend fun unlock(profileId: Long, key: String, at: Instant): Boolean {
+                val stored = achievements.unlock(profileId, key, at)
+                if (stored) {
+                    profiles.addLux(1, 10)
+                    yield()
+                }
+                return stored
+            }
+        }
+        val racingUnlock = UnlockAchievementsUseCase(
+            profiles,
+            challenges,
+            cases,
+            racing,
+            GameClock(time, FakeSettingsRepository()),
+            time,
+        )
+        racingUnlock().test {
+            val first = cases.accept(1, 1, isDaily = false, at = time.now(), on = today)
+            cases.close(first, time.now(), today, luxEarned = 10)
+            assertThat(awaitItem()).containsExactly(Achievement.FIRST_CLOSED)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
