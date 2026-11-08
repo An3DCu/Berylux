@@ -1,7 +1,9 @@
 [versions]
 androidGradlePlugin = "9.5.1"
 kotlin = "2.4.21"
-ksp = "2.3.13"
+# Held at 2.3.12: 2.3.13 can write no Hilt code for a module when modules build in parallel
+# (google/ksp#3286). Move up once a release fixes it.
+ksp = "2.3.12"
 hilt = "2.60.1"
 androidxHilt = "1.4.0"
 room = "2.8.5"
