@@ -1,5 +1,8 @@
 package com.anadcurukovic.berylux.feature.profile.welcome
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,7 +44,15 @@ class WelcomeViewModel @Inject constructor(
     )
     val state: StateFlow<WelcomeUiState> = _state.asStateFlow()
 
+    /**
+     * The name in the field, as Compose state: a keystroke shows in the same frame, so fast typing
+     * can't lose or reorder letters the way a round trip through a flow can.
+     */
+    var name: String by mutableStateOf(_state.value.name)
+        private set
+
     fun onNameChange(name: String) {
+        this.name = name
         savedState[NAME] = name
         _state.update { it.copy(name = name, problem = null, failed = false) }
     }

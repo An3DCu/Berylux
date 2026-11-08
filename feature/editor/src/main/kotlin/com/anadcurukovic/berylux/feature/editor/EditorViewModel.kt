@@ -1,5 +1,8 @@
 package com.anadcurukovic.berylux.feature.editor
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -89,6 +92,16 @@ class EditorViewModel @AssistedInject constructor(
     )
     private val events = Channel<EditorEvent>(Channel.BUFFERED)
 
+    /**
+     * The text in the fields, as Compose state: a keystroke shows in the same frame, so fast typing
+     * can't lose or reorder letters the way a round trip through a flow can. [savedState] keeps a
+     * copy for process death, and the counters and problems in [uiState] follow from that copy.
+     */
+    var title: String by mutableStateOf(savedState[TITLE] ?: "")
+        private set
+    var description: String by mutableStateOf(savedState[DESCRIPTION] ?: "")
+        private set
+
     /** One-off events: leave the screen, or say it didn't work. */
     val eventFlow: Flow<EditorEvent> = events.receiveAsFlow()
 
@@ -136,22 +149,25 @@ class EditorViewModel @AssistedInject constructor(
     }
 
     fun onTitleChange(title: String) {
+        this.title = title
         savedState[TITLE] = title
     }
 
     fun onDescriptionChange(description: String) {
+        this.description = description
         savedState[DESCRIPTION] = description
     }
 
     fun onSave() {
         if (working.value.saving || working.value.status != Status.READY) return
         savedState[TRIED] = true
-        val title = savedState.get<String>(TITLE).orEmpty()
-        val description = savedState.get<String>(DESCRIPTION).orEmpty()
-        if (ChallengeRules.problems(title, description).isNotEmpty()) return
+        // What's in the fields now; typing on while it saves doesn't change what gets saved.
+        val typedTitle = title
+        val typedDescription = description
+        if (ChallengeRules.problems(typedTitle, typedDescription).isNotEmpty()) return
         working.update { it.copy(saving = true) }
         viewModelScope.launch {
-            val result = runCatching { save(challengeId, title, description) }.getOrNull()
+            val result = runCatching { save(challengeId, typedTitle, typedDescription) }.getOrNull()
             working.update { it.copy(saving = false) }
             events.send(if (result is SaveResult.Saved) EditorEvent.Done else EditorEvent.Failed)
         }
@@ -183,8 +199,8 @@ class EditorViewModel @AssistedInject constructor(
                 working.value = Working(Status.NOT_FOUND)
                 return@launch
             }
-            savedState[TITLE] = challenge.title
-            savedState[DESCRIPTION] = challenge.description
+            onTitleChange(challenge.title)
+            onDescriptionChange(challenge.description)
             savedState[LOADED] = true
             working.value = Working(Status.READY)
         }

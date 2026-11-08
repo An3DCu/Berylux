@@ -114,7 +114,18 @@ class EditorViewModelTest {
         val saved = SavedStateHandle()
         collecting(editor(2, saved)).onTitleChange("Read three poems")
         val restored = collecting(editor(2, saved))
+        assertThat(restored.title).isEqualTo("Read three poems")
         assertThat(form(restored).title).isEqualTo("Read three poems")
+    }
+
+    @Test
+    fun `typing shows in the field text at once, without waiting for the flow`() = runTest {
+        val vm = editor(null)
+        vm.onTitleChange("Call")
+        vm.onTitleChange("Call grandma")
+        vm.onDescriptionChange("On Sunday.")
+        assertThat(vm.title).isEqualTo("Call grandma")
+        assertThat(vm.description).isEqualTo("On Sunday.")
     }
 
     @Test

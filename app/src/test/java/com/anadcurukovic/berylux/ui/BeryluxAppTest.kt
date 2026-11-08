@@ -1,5 +1,6 @@
 package com.anadcurukovic.berylux.ui
 
+import android.os.Looper
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import com.anadcurukovic.berylux.MainActivity
+import com.anadcurukovic.berylux.core.testing.FakeTimeSource
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
@@ -25,11 +27,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.time.Duration
+import java.time.Instant
+import javax.inject.Inject
 
 /**
  * The real app on Robolectric: Hilt, Room, DataStore and every screen, as a player would use it.
- * Each test starts with a fresh install.
+ * Each test starts with a fresh install, at 9 PM on the clock from TestTimeModule.
  */
 @OptIn(ExperimentalTestApi::class)
 @HiltAndroidTest
@@ -43,8 +49,18 @@ class BeryluxAppTest {
     @get:Rule(order = 1)
     val compose = createAndroidComposeRule<MainActivity>()
 
+    @Inject
+    lateinit var clock: FakeTimeSource
+
     @Before
     fun inject() = hilt.inject()
+
+    /** Moves the clock, then lets a minute pass so the app's day check runs. */
+    private fun clockTo(instant: String) {
+        clock.instant = Instant.parse(instant)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMinutes(1))
+        compose.waitForIdle()
+    }
 
     // Room answers on its own threads, so wait for text instead of assuming it's there.
     private fun waitForText(text: String) =
@@ -67,6 +83,20 @@ class BeryluxAppTest {
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(name))
         tap(name)
         assertOn(name)
+    }
+
+    /** Takes the first case Today still offers. [taken] is how many the day has after it. */
+    private fun takeFirstCase(taken: Int) {
+        waitForText("Take it")
+        compose.onAllNodesWithText("Take it").onFirst().performScrollTo().performClick()
+        waitForText("$taken of 5 cases today")
+    }
+
+    private fun closeFirstOpenCase() {
+        compose.waitUntilAtLeastOneExists(hasText("Close"), timeoutMillis = 5_000)
+        compose.onAllNodesWithText("Close").onFirst().performClick()
+        tap("Close it")
+        waitForText("Lux earned")
     }
 
     private fun startAs(name: String) {
@@ -238,5 +268,57 @@ class BeryluxAppTest {
         openCategory("Mind")
         compose.activityRule.scenario.recreate()
         assertOn("Mind")
+    }
+
+    @Test
+    fun closingTheDailyCaseMovesLuxRankAndStreak() {
+        startAs("Sam")
+        waitForText("Goshenite · 0 Lux")
+        waitForText("500 Lux to Heliodor")
+        tap("Progress")
+        assertOn("Progress")
+        waitForText("0 days")
+
+        tap("Today")
+        takeFirstCase(taken = 1)
+        tap("Cases")
+        closeFirstOpenCase()
+
+        tap("Today")
+        compose.waitUntilDoesNotExist(hasText("Goshenite · 0 Lux"), timeoutMillis = 5_000)
+        compose.onAllNodesWithText("500 Lux to Heliodor").assertCountEquals(0)
+        tap("Progress")
+        waitForText("1 day")
+        waitForText("Today counts already.")
+    }
+
+    @Test
+    fun theDayEndsAt4AMOpenCasesGoColdAndTheStreakMoves() {
+        startAs("Sam")
+        takeFirstCase(taken = 1)
+        takeFirstCase(taken = 2)
+        tap("Cases")
+        waitForText("Today · 2 of 5 cases")
+        closeFirstOpenCase()
+
+        // 3:59 AM in Sarajevo: still Sunday's game day.
+        clockTo("2026-11-09T02:59:00Z")
+        waitForText("Today · 2 of 5 cases")
+
+        // 4:01 AM: Monday's game day. The open case went cold; the closed one stays closed.
+        clockTo("2026-11-09T03:01:00Z")
+        waitForText("No cases today.")
+        waitForText("Went cold when its day ended")
+        tap("Progress")
+        waitForText("1 day")
+        waitForText("Close a case today to keep it going.")
+
+        tap("Today")
+        waitForText("0 of 5 cases today")
+        takeFirstCase(taken = 1)
+        tap("Cases")
+        closeFirstOpenCase()
+        tap("Progress")
+        waitForText("2 days")
     }
 }
