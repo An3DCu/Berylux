@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="settings_heading">Settings</string>
+
+    <string name="settings_hour_title">The day starts at</string>
+    <!-- For TalkBack on the − and + buttons. -->
+    <string name="settings_hour_earlier">Earlier</string>
+    <string name="settings_hour_later">Later</string>
+    <string name="settings_hour_note">A case closed before %1$s counts for the day before.</string>
+    <string name="settings_hour_pending">From tomorrow, the day starts at %1$s.</string>
+
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_dark">Dark desk</string>
+    <string name="settings_theme_paper">Case paper</string>
+    <string name="settings_theme_system">Follow the phone</string>
+
+    <string name="settings_effects_title">Grain and scanlines</string>
+    <string name="settings_effects_clean">Clean</string>
+    <string name="settings_effects_heavy">Heavy</string>
+    <string name="settings_effects_level" tools:ignore="PluralsCandidate">%1$d of %2$d</string>
+    <!-- For TalkBack on each of the five segments. -->
+    <string name="settings_effects_set" tools:ignore="PluralsCandidate">Grain and scanlines: %1$d of %2$d</string>
+
+    <string name="settings_error">Settings wouldn\'t open. Restart the app to try again.</string>
+</resources>

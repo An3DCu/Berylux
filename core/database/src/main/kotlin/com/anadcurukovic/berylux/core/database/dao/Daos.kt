@@ -30,6 +30,9 @@ interface ProfileDao {
 
     @Query("UPDATE profiles SET lux = lux + :amount WHERE id = :id")
     suspend fun addLux(id: Long, amount: Int)
+
+    @Query("UPDATE profiles SET sigil_seed = :seed WHERE id = :id")
+    suspend fun setSigilSeed(id: Long, seed: Long)
 }
 
 @Dao

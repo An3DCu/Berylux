@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import com.anadcurukovic.berylux.MainActivity
 import com.anadcurukovic.berylux.core.testing.FakeTimeSource
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -233,13 +234,26 @@ class BeryluxAppTest {
     fun profileOpensFromTheSigilAndSettingsFromProfile() {
         startAs("Sam")
         compose.onNode(hasContentDescription("Open your profile")).performClick()
-        assertOn("Profile")
+        assertOn("Personnel file")
         tap("Settings")
         assertOn("Settings")
+        waitForText("The day starts at")
         pressBack()
-        assertOn("Profile")
+        assertOn("Personnel file")
         pressBack()
         assertOn("Daily case")
+    }
+
+    @Test
+    fun filingANewNameShowsItOnToday() {
+        startAs("Sam")
+        compose.onNode(hasContentDescription("Open your profile")).performClick()
+        assertOn("Personnel file")
+        waitForText("Sam")
+        compose.onNode(hasSetTextAction()).performTextReplacement("Sam Spade")
+        tap("File it")
+        assertOn("Daily case")
+        waitForText("Sam Spade")
     }
 
     @Test

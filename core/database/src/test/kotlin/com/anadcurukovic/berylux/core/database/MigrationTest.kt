@@ -97,4 +97,24 @@ class MigrationTest {
         assertThat(migrated.longs("SELECT count(*) FROM cases")).containsExactly(0L)
         migrated.close()
     }
+
+    @Test
+    fun `2 to 3 gives each profile a sigil seed equal to its pick seed, and keeps everything else`() {
+        helper.createDatabase(2).apply {
+            execSQL("INSERT INTO profiles (id, name, lux, pick_seed, created_at) VALUES (1, 'Guest', 63, 42, 0)")
+            execSQL(
+                "INSERT INTO cases (id, profile_id, challenge_id, status, is_daily, accepted_at, accepted_on, " +
+                    "closed_at, closed_on, lux_earned) VALUES (1, 1, 1, 'CLOSED', 1, 1000, 20398, 2000, 20398, 15)",
+            )
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(3, ALL_MIGRATIONS)
+
+        assertThat(migrated.longs("SELECT sigil_seed FROM profiles WHERE id = 1")).containsExactly(42L)
+        assertThat(migrated.longs("SELECT pick_seed FROM profiles WHERE id = 1")).containsExactly(42L)
+        assertThat(migrated.longs("SELECT lux FROM profiles WHERE id = 1")).containsExactly(63L)
+        assertThat(migrated.longs("SELECT lux_earned FROM cases WHERE id = 1")).containsExactly(15L)
+        migrated.close()
+    }
 }

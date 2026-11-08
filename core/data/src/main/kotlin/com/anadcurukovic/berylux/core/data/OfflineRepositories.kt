@@ -48,6 +48,8 @@ internal class OfflineProfileRepository @Inject constructor(
 
     override suspend fun rename(profileId: Long, name: String) = dao.rename(profileId, name)
 
+    override suspend fun setSigilSeed(profileId: Long, seed: Long) = dao.setSigilSeed(profileId, seed)
+
     override suspend fun addLux(profileId: Long, amount: Int) = dao.addLux(profileId, amount)
 }
 
@@ -138,6 +140,9 @@ internal class OfflineSettingsRepository @Inject constructor(
     override val settings: Flow<UserSettings> = source.settings
 
     override suspend fun setDayStartHour(hour: Int) = source.setDayStartHour(hour)
+
+    override suspend fun scheduleDayStartHour(current: Int, next: Int?, from: Instant?) =
+        source.scheduleDayStartHour(current, next, from)
 
     override suspend fun setTheme(theme: ThemeMode) = source.setTheme(theme)
 

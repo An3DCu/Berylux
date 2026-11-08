@@ -115,7 +115,7 @@ class RivalBoardUseCase @Inject constructor(
         }
         return profiles.profile.filterNotNull().flatMapLatest { profile ->
             combine(cases.caseFiles(profile.id), settings.settings, ticks) { files, userSettings, now ->
-                board(files, profile, now, userSettings.dayStartHour)
+                board(files, profile, now, userSettings.startHourAt(now))
             }
         }
     }

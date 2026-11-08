@@ -31,12 +31,33 @@ class SettingsDataSource @Inject constructor(
             effectsLevel = prefs[EFFECTS_LEVEL]
                 ?.takeIf { it in UserSettings.EFFECTS_LEVELS }
                 ?: UserSettings.DEFAULT_EFFECTS_LEVEL,
+            nextDayStartHour = prefs[NEXT_DAY_START_HOUR]?.takeIf { it in UserSettings.DAY_START_HOURS },
+            nextHourFrom = prefs[NEXT_HOUR_FROM]?.let(Instant::ofEpochMilli),
         )
     }
 
     suspend fun setDayStartHour(hour: Int) {
         require(hour in UserSettings.DAY_START_HOURS) { "hour must be 0 to 23, was $hour" }
         dataStore.edit { it[DAY_START_HOUR] = hour }
+    }
+
+    /**
+     * The start hour now, and the one that takes over at [from]; both null clear a waiting change.
+     * Written together, so the clock never reads one without the other.
+     */
+    suspend fun scheduleDayStartHour(current: Int, next: Int?, from: Instant?) {
+        require(current in UserSettings.DAY_START_HOURS) { "hour must be 0 to 23, was $current" }
+        require(next == null || next in UserSettings.DAY_START_HOURS) { "hour must be 0 to 23, was $next" }
+        dataStore.edit { prefs ->
+            prefs[DAY_START_HOUR] = current
+            if (next != null && from != null) {
+                prefs[NEXT_DAY_START_HOUR] = next
+                prefs[NEXT_HOUR_FROM] = from.toEpochMilli()
+            } else {
+                prefs.remove(NEXT_DAY_START_HOUR)
+                prefs.remove(NEXT_HOUR_FROM)
+            }
+        }
     }
 
     suspend fun setTheme(theme: ThemeMode) {
@@ -62,5 +83,7 @@ class SettingsDataSource @Inject constructor(
         val THEME = stringPreferencesKey("theme")
         val EFFECTS_LEVEL = intPreferencesKey("effects_level")
         val ACHIEVEMENTS_SEEN_AT = longPreferencesKey("achievements_seen_at")
+        val NEXT_DAY_START_HOUR = intPreferencesKey("next_day_start_hour")
+        val NEXT_HOUR_FROM = longPreferencesKey("next_hour_from")
     }
 }

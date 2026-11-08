@@ -90,7 +90,7 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
         editorEntries(onDone = { navigator.goBack() })
         progressEntries(onOpenRivals = { navigator.navigate(RivalsRoute) })
         rivalsEntries()
-        profileEntries(onOpenSettings = { navigator.navigate(SettingsRoute) })
+        profileEntries(onOpenSettings = { navigator.navigate(SettingsRoute) }, onDone = { navigator.goBack() })
         settingsEntries()
     }
 
