@@ -9,6 +9,7 @@ import com.anadcurukovic.berylux.core.domain.repository.ProfileRepository
 import com.anadcurukovic.berylux.core.domain.repository.SettingsRepository
 import com.anadcurukovic.berylux.core.model.Achievement
 import com.anadcurukovic.berylux.core.model.ThemeMode
+import com.anadcurukovic.berylux.core.model.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -57,6 +58,11 @@ class AppViewModel @Inject constructor(
     val theme: StateFlow<ThemeMode> = settings.settings
         .map { it.theme }
         .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.DARK)
+
+    /** How strong the grain and scanlines are, 1 to 5; 3 until the settings are read. */
+    val effectsLevel: StateFlow<Int> = settings.settings
+        .map { it.effectsLevel }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, UserSettings.DEFAULT_EFFECTS_LEVEL)
 
     private val unlocks = Channel<Achievement>(Channel.UNLIMITED)
 

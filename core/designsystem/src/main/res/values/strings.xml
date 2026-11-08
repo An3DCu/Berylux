@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The case's id, padded to four digits. -->
+    <string name="designsystem_case_number">CASE NO. %1$04d</string>
+</resources>

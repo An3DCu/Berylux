@@ -8,10 +8,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.component.beryluxEffects
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.ui.AppViewModel
 import com.anadcurukovic.berylux.ui.BeryluxApp
@@ -26,6 +30,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge(barStyle(daylight = false), barStyle(daylight = false))
         setContent {
             val theme by appViewModel.theme.collectAsStateWithLifecycle()
+            val effectsLevel by appViewModel.effectsLevel.collectAsStateWithLifecycle()
             val daylight = when (theme) {
                 ThemeMode.DARK -> false
                 ThemeMode.DAYLIGHT -> true
@@ -34,7 +39,10 @@ class MainActivity : ComponentActivity() {
             // The bar icons follow the app's theme, not the phone's light or dark mode.
             LaunchedEffect(daylight) { enableEdgeToEdge(barStyle(daylight), barStyle(daylight)) }
             BeryluxTheme(daylight = daylight) {
-                BeryluxApp(appViewModel = appViewModel)
+                // The grain and scanlines lie over every screen, the bars included.
+                Box(Modifier.fillMaxSize().beryluxEffects(effectsLevel)) {
+                    BeryluxApp(appViewModel = appViewModel)
+                }
             }
         }
     }
