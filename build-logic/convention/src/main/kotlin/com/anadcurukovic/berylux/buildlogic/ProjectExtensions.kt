@@ -7,7 +7,11 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestListener
+import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
@@ -59,6 +63,8 @@ fun Project.configureUnitTests() {
             events("failed")
             exceptionFormat = TestExceptionFormat.FULL
         }
+        // Each test's time in the log, to tell a slow machine from a step that hangs.
+        addTestListener(TestTimes)
     }
     dependencies {
         add("testImplementation", libs.lib("junit4"))
@@ -94,4 +100,20 @@ fun Project.configureDetekt() {
             }
         }
     }
+}
+
+/** Prints how long each test took, as `TIME  1234 ms  Class > test`. */
+private object TestTimes : TestListener {
+    private val logger = Logging.getLogger("TestTimes")
+
+    override fun afterTest(test: TestDescriptor, result: TestResult) {
+        val millis = result.endTime - result.startTime
+        logger.lifecycle("TIME %6d ms  %s > %s".format(millis, test.className?.substringAfterLast('.'), test.name))
+    }
+
+    override fun beforeSuite(suite: TestDescriptor) = Unit
+
+    override fun afterSuite(suite: TestDescriptor, result: TestResult) = Unit
+
+    override fun beforeTest(test: TestDescriptor) = Unit
 }
