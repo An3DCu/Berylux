@@ -15,6 +15,7 @@ import com.anadcurukovic.berylux.core.model.GemRank
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -89,19 +90,25 @@ class UnlockAchievementsUseCase @Inject constructor(
     private val time: TimeSource,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(): Flow<List<Achievement>> =
-        profiles.profile.filterNotNull().flatMapLatest { profile ->
+    operator fun invoke(): Flow<List<Achievement>> {
+        val profile = profiles.profile.filterNotNull()
+        // Restart only for another player. Closing a case changes the profile's Lux too; restarting
+        // on that could cancel an unlock after it was stored but before it came through, and the
+        // message would be lost.
+        return profile.map { it.id }.distinctUntilChanged().flatMapLatest { profileId ->
             combine(
-                cases.caseFiles(profile.id),
-                cases.closedDays(profile.id),
+                profile,
+                cases.caseFiles(profileId),
+                cases.closedDays(profileId),
                 challenges.categories,
                 clock.days(),
-            ) { files, closedDays, categories, today ->
+            ) { player, files, closedDays, categories, today ->
                 val streak = Streaks.calculate(closedDays, today)
-                AchievementRules.earned(files, categories, profile.lux, streak)
+                AchievementRules.earned(files, categories, player.lux, streak)
             }.map { earned ->
                 // unlock() is false for one already stored, so each comes through once.
-                earned.filter { achievements.unlock(profile.id, it.key, time.now()) }
+                earned.filter { achievements.unlock(profileId, it.key, time.now()) }
             }
         }.filter { it.isNotEmpty() }
+    }
 }
