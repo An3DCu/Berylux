@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Plain working copy. The character round rewrites it in the case-file voice. -->
 <resources>
-    <string name="editor_new_title">New challenge</string>
-    <string name="editor_edit_title">Edit challenge</string>
-    <string name="editor_note">It goes in My cases. Your own challenges give no Lux, but the days you close them count for your streak.</string>
+    <string name="editor_new_title">Write a case</string>
+    <string name="editor_edit_title">Edit the case</string>
+    <string name="editor_note">It goes in My cases. Your own cases pay no Lux, but the days you close them count for your streak.</string>
     <string name="editor_title_label">Title</string>
     <string name="editor_description_label">Description (optional)</string>
     <string name="editor_count">%1$d / %2$d</string>
-    <string name="editor_title_empty">Give it a title.</string>
+    <string name="editor_title_empty">Every case needs a title.</string>
     <string name="editor_title_too_long">Keep the title to %1$d characters.</string>
     <string name="editor_description_too_long">Keep the description to %1$d characters.</string>
-    <string name="editor_save">Save</string>
+    <string name="editor_save">File it</string>
     <string name="editor_delete">Delete</string>
-    <string name="editor_failed">That didn\'t work. Try again.</string>
-    <string name="editor_not_found">This challenge isn\'t there any more.</string>
+    <string name="editor_failed">That didn\'t go through. Try again.</string>
+    <string name="editor_not_found">This case isn\'t in the archive any more.</string>
 
     <string name="editor_delete_title">Delete \"%1$s\"?</string>
     <plurals name="editor_delete_cases">

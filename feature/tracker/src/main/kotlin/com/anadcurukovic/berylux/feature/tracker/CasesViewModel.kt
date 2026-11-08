@@ -9,6 +9,8 @@ import com.anadcurukovic.berylux.core.domain.DailyCap
 import com.anadcurukovic.berylux.core.domain.DropResult
 import com.anadcurukovic.berylux.core.domain.GameClock
 import com.anadcurukovic.berylux.core.domain.LuxRules
+import com.anadcurukovic.berylux.core.domain.Narration
+import com.anadcurukovic.berylux.core.domain.NarratorRules
 import com.anadcurukovic.berylux.core.domain.repository.CaseRepository
 import com.anadcurukovic.berylux.core.domain.repository.ChallengeRepository
 import com.anadcurukovic.berylux.core.domain.repository.ProfileRepository
@@ -18,6 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -64,6 +67,24 @@ sealed interface PendingAction {
     data class Drop(override val case: CaseUi) : PendingAction
 }
 
+/**
+ * The case just closed, stamped, with the narrator's line under it: [line] indexes the pool for
+ * [narration] (see [NarratorPool]). It stays until the player leaves Cases.
+ */
+data class JustClosed(val caseId: Long, val narration: Narration, val line: Int)
+
+/** How many lines each narrator pool in the strings has. */
+internal object NarratorPool {
+    const val CLOSE = 12
+    const val RANK_UP = 6
+
+    fun size(narration: Narration): Int = when (narration) {
+        Narration.Close -> CLOSE
+        Narration.RankUp -> RANK_UP
+        is Narration.Milestone -> 1
+    }
+}
+
 sealed interface CasesUiState {
     data object Loading : CasesUiState
 
@@ -72,6 +93,7 @@ sealed interface CasesUiState {
         val used: Int,
         val history: List<DayUi>,
         val pending: PendingAction?,
+        val justClosed: JustClosed? = null,
     ) : CasesUiState {
         val limit: Int get() = DailyCap.LIMIT
     }
@@ -101,6 +123,8 @@ class CasesViewModel @Inject constructor(
     private val pendingId = savedState.getStateFlow<Long?>(PENDING_ID, null)
     private val pendingKind = savedState.getStateFlow<String?>(PENDING_KIND, null)
     private val messages = Channel<CasesMessage>(Channel.BUFFERED)
+    private val justClosed = MutableStateFlow<JustClosed?>(null)
+    private val lastLines = mutableMapOf<Narration, Int>()
     private var working = false
 
     /** One-off messages for a snackbar; each is shown once. */
@@ -115,8 +139,14 @@ class CasesViewModel @Inject constructor(
     private val pending: Flow<Pair<Long?, String?>> = combine(pendingId, pendingKind) { id, kind -> id to kind }
 
     val uiState: StateFlow<CasesUiState> =
-        combine(allCases, clock.days(), challenges.categories, pending) { files, today, categories, (id, kind) ->
-            content(files, today, categories.associate { it.id to it.name }, id, kind)
+        combine(
+            allCases,
+            clock.days(),
+            challenges.categories,
+            pending,
+            justClosed
+        ) { files, today, categories, (id, kind), just ->
+            content(files, today, categories.associate { it.id to it.name }, id, kind).copy(justClosed = just)
         }
             .catch<CasesUiState> { emit(CasesUiState.Error) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), CasesUiState.Loading)
@@ -124,6 +154,11 @@ class CasesViewModel @Inject constructor(
     fun onClose(case: CaseUi) = ask(case, CLOSE)
 
     fun onDrop(case: CaseUi) = ask(case, DROP)
+
+    /** The player left Cases: the stamp and the narrator's line are done. */
+    fun onLeave() {
+        justClosed.value = null
+    }
 
     fun onDismiss() {
         savedState[PENDING_ID] = null
@@ -140,7 +175,10 @@ class CasesViewModel @Inject constructor(
             val message = runCatching {
                 when (pending) {
                     is PendingAction.Close -> when (val result = actions.close(file)) {
-                        is CloseResult.Closed -> CasesMessage.Closed(file.challenge.title, result.lux)
+                        is CloseResult.Closed -> {
+                            narrate(file.case.id, result.narration)
+                            CasesMessage.Closed(file.challenge.title, result.lux)
+                        }
                         CloseResult.WentCold -> CasesMessage.WentCold
                         CloseResult.NotOpen, CloseResult.NoProfile -> CasesMessage.Failed
                     }
@@ -154,6 +192,13 @@ class CasesViewModel @Inject constructor(
             messages.send(message)
             working = false
         }
+    }
+
+    private fun narrate(caseId: Long, narration: Narration) {
+        val size = NarratorPool.size(narration)
+        val line = NarratorRules.nextLine(size, lastLines[narration])
+        lastLines[narration] = line
+        justClosed.value = JustClosed(caseId, narration, line)
     }
 
     private fun ask(case: CaseUi, kind: String) {

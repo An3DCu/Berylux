@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -22,14 +21,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.designsystem.component.StampButton
+import com.anadcurukovic.berylux.core.designsystem.component.Wordmark
 import com.anadcurukovic.berylux.core.domain.NameProblem
 import com.anadcurukovic.berylux.core.domain.NameRules
 import com.anadcurukovic.berylux.core.ui.SigilAvatar
@@ -68,10 +70,11 @@ fun WelcomeContent(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Wordmark(contentDescription = stringResource(R.string.welcome_title))
             Text(
-                text = stringResource(R.string.welcome_title),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.semantics { heading() },
+                text = stringResource(R.string.welcome_tagline),
+                style = BeryluxType.Text,
+                color = Berylux.colors.onBackgroundFaded,
             )
             SigilAvatar(seed = state.seed, size = 112.dp)
             TextButton(onClick = onDrawAnother) { Text(stringResource(R.string.welcome_draw_another)) }
@@ -103,9 +106,12 @@ fun WelcomeContent(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            Button(onClick = onStart, enabled = !state.starting, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.welcome_start))
-            }
+            StampButton(
+                text = stringResource(R.string.welcome_start),
+                onClick = onStart,
+                enabled = !state.starting,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
@@ -113,7 +119,7 @@ fun WelcomeContent(
 @Preview
 @Composable
 private fun WelcomePreview() {
-    MaterialTheme {
+    BeryluxTheme {
         WelcomeContent(
             state = WelcomeUiState(name = "Sam", seed = 1234),
             onNameChange = {},
