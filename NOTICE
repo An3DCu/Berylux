@@ -2,3 +2,10 @@ Berylux
 Copyright 2026 Anad Čuruković
 
 Licensed under the Apache License, Version 2.0. See LICENSE.
+
+This app bundles these fonts, unchanged, in core/designsystem/src/main/res/font.
+Their license texts are in licenses/fonts.
+
+- Bebas Neue, Copyright 2010 by Dharma Type. SIL Open Font License 1.1.
+- Special Elite, Copyright 2010 by Brian J. Bonislawsky DBA Astigmatic (AOETI). Apache License 2.0.
+- IBM Plex Mono, Copyright 2017 IBM Corp. with Reserved Font Name "Plex". SIL Open Font License 1.1.
