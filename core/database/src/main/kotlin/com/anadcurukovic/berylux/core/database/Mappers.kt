@@ -9,7 +9,14 @@ import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.Challenge
 import com.anadcurukovic.berylux.core.model.Profile
 
-fun ProfileEntity.asModel() = Profile(id = id, name = name, lux = lux, pickSeed = pickSeed, createdAt = createdAt)
+fun ProfileEntity.asModel() = Profile(
+    id = id,
+    name = name,
+    lux = lux,
+    pickSeed = pickSeed,
+    createdAt = createdAt,
+    sigilSeed = sigilSeed,
+)
 
 fun CategoryEntity.asModel() = Category(id = id, name = name, description = description, kind = kind)
 

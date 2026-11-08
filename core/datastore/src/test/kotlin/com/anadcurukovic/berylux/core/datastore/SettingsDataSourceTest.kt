@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import java.time.Instant
 
 class SettingsDataSourceTest {
     private fun newStore() = InMemoryPreferencesDataStore()
@@ -30,6 +31,24 @@ class SettingsDataSourceTest {
         assertThat(source.settings.first()).isEqualTo(
             UserSettings(dayStartHour = 6, theme = ThemeMode.DAYLIGHT, effectsLevel = 1),
         )
+    }
+
+    @Test
+    fun `a waiting start hour is kept with its time, and clearing it removes both`() = runTest {
+        val source = SettingsDataSource(newStore())
+        val from = Instant.parse("2026-11-10T03:00:00Z")
+        source.scheduleDayStartHour(current = 4, next = 6, from = from)
+        source.settings.first().let {
+            assertThat(it.dayStartHour).isEqualTo(4)
+            assertThat(it.nextDayStartHour).isEqualTo(6)
+            assertThat(it.nextHourFrom).isEqualTo(from)
+        }
+
+        source.scheduleDayStartHour(current = 4, next = null, from = null)
+        source.settings.first().let {
+            assertThat(it.nextDayStartHour).isNull()
+            assertThat(it.nextHourFrom).isNull()
+        }
     }
 
     @Test

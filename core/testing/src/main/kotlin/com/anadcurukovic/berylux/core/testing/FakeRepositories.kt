@@ -42,6 +42,10 @@ class FakeProfileRepository(initial: Profile? = null) : ProfileRepository {
 
     override suspend fun rename(profileId: Long, name: String) = state.update { it?.copy(name = name) }
 
+    override suspend fun setSigilSeed(profileId: Long, seed: Long) {
+        state.update { it?.copy(sigilSeed = seed) }
+    }
+
     override suspend fun addLux(profileId: Long, amount: Int) = state.update { it?.copy(lux = it.lux + amount) }
 
     /** For the fake cases: the same floor at 0 as the database. */
@@ -184,6 +188,15 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
     override val settings: Flow<UserSettings> = state
 
     override suspend fun setDayStartHour(hour: Int) = state.update { it.copy(dayStartHour = hour) }
+
+    override suspend fun scheduleDayStartHour(current: Int, next: Int?, from: Instant?) = state.update {
+        val waiting = next != null && from != null
+        it.copy(
+            dayStartHour = current,
+            nextDayStartHour = next.takeIf { waiting },
+            nextHourFrom = from.takeIf { waiting },
+        )
+    }
 
     override suspend fun setTheme(theme: ThemeMode) = state.update { it.copy(theme = theme) }
 

@@ -39,5 +39,20 @@ internal val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(connection: SQLiteConnection) = statements.forEach(connection::execSQL)
 }
 
+/**
+ * Version 2 to 3: the sigil gets its own seed, so redrawing it leaves the daily picks and the rival
+ * bots alone. Each profile's sigil seed starts as its pick seed, so every sigil looks the same.
+ */
+internal val MIGRATION_2_3 = object : Migration(2, 3) {
+    private val statements = listOf(
+        "ALTER TABLE `profiles` ADD COLUMN `sigil_seed` INTEGER NOT NULL DEFAULT 0",
+        "UPDATE `profiles` SET `sigil_seed` = `pick_seed`",
+    )
+
+    override fun migrate(db: SupportSQLiteDatabase) = statements.forEach(db::execSQL)
+
+    override fun migrate(connection: SQLiteConnection) = statements.forEach(connection::execSQL)
+}
+
 /** Every migration, oldest first. A new version adds its migration here. */
-internal val ALL_MIGRATIONS = listOf(MIGRATION_1_2)
+internal val ALL_MIGRATIONS = listOf(MIGRATION_1_2, MIGRATION_2_3)

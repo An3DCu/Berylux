@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -20,21 +19,25 @@ class GameClock @Inject constructor(
     private val time: TimeSource,
     private val settings: SettingsRepository,
 ) {
-    suspend fun today(): LocalDate = GameDay.of(time.now(), time.zone(), settings.settings.first().dayStartHour)
+    suspend fun today(): LocalDate {
+        val now = time.now()
+        return GameDay.of(now, time.zone(), settings.settings.first().startHourAt(now))
+    }
 
     /**
-     * The game day, and again each time it changes: at the start hour, or when the player moves
-     * the start hour. It looks at the clock once every [tick], which is enough for a day counter.
+     * The game day, and again each time it changes: at the start hour, including a new one the
+     * player picked once its day comes. It looks at the clock once every [tick], which is enough for
+     * a day counter.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun days(tick: Duration = 1.minutes): Flow<LocalDate> =
         settings.settings
-            .map { it.dayStartHour }
             .distinctUntilChanged()
-            .flatMapLatest { hour ->
+            .flatMapLatest { userSettings ->
                 flow {
                     while (true) {
-                        emit(GameDay.of(time.now(), time.zone(), hour))
+                        val now = time.now()
+                        emit(GameDay.of(now, time.zone(), userSettings.startHourAt(now)))
                         delay(tick)
                     }
                 }

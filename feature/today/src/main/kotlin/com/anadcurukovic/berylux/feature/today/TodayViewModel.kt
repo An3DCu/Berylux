@@ -162,7 +162,7 @@ class TodayViewModel @Inject constructor(
         val pick = DailyPicker.pick(b.challenges, b.categories, b.day, b.profile.pickSeed, selected)
         return TodayUiState.Content(
             name = b.profile.name,
-            sigilSeed = b.profile.pickSeed,
+            sigilSeed = b.profile.sigilSeed,
             lux = b.profile.lux,
             rank = RankRules.progress(b.profile.lux),
             used = DailyCap.usedOn(b.day, todays.map { it.case }),

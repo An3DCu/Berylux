@@ -21,10 +21,16 @@ interface ProfileRepository {
     /** The player's profile, or null before the first launch has made one. */
     val profile: Flow<Profile?>
 
-    /** [pickSeed] drives the daily pick and the sigil, so the welcome screen can show it first. */
+    /**
+     * [pickSeed] drives the daily pick and the rivals; the sigil starts from it too, so the welcome
+     * screen can show the sigil first.
+     */
     suspend fun createGuest(name: String, pickSeed: Long): Profile
 
     suspend fun rename(profileId: Long, name: String)
+
+    /** A new sigil. The pick seed stays, so the day's picks and the rivals don't change. */
+    suspend fun setSigilSeed(profileId: Long, seed: Long)
 
     suspend fun addLux(profileId: Long, amount: Int)
 }
@@ -89,6 +95,9 @@ interface SettingsRepository {
     val settings: Flow<UserSettings>
 
     suspend fun setDayStartHour(hour: Int)
+
+    /** The start hour now, and [next] from [from] on; both null clear a waiting change. */
+    suspend fun scheduleDayStartHour(current: Int, next: Int?, from: Instant?)
 
     suspend fun setTheme(theme: ThemeMode)
 

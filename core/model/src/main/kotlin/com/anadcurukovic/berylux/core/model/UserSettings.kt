@@ -1,5 +1,7 @@
 package com.anadcurukovic.berylux.core.model
 
+import java.time.Instant
+
 enum class ThemeMode {
     DARK,
     DAYLIGHT,
@@ -8,13 +10,29 @@ enum class ThemeMode {
 
 /**
  * @property dayStartHour the hour a new game day starts, 0 to 23.
+ * @property nextDayStartHour a new start hour the player picked, waiting for [nextHourFrom]: the end
+ *   of the game day it was picked on. Today keeps its end; the new hour starts with the next day.
  * @property effectsLevel how strong grain, scanlines and glow are, 1 (clean) to 5 (heavy).
  */
 data class UserSettings(
     val dayStartHour: Int = DEFAULT_DAY_START_HOUR,
     val theme: ThemeMode = ThemeMode.DARK,
     val effectsLevel: Int = DEFAULT_EFFECTS_LEVEL,
+    val nextDayStartHour: Int? = null,
+    val nextHourFrom: Instant? = null,
 ) {
+    /** The hour the game day starts at [instant]: the next hour once its time has come. */
+    fun startHourAt(instant: Instant): Int =
+        if (nextDayStartHour != null && nextHourFrom != null && !instant.isBefore(nextHourFrom)) {
+            nextDayStartHour
+        } else {
+            dayStartHour
+        }
+
+    /** The hour still waiting to take effect at [instant], or null when none is. */
+    fun pendingStartHourAt(instant: Instant): Int? =
+        nextDayStartHour?.takeIf { nextHourFrom != null && instant.isBefore(nextHourFrom) }
+
     companion object {
         const val DEFAULT_DAY_START_HOUR = 4
         const val DEFAULT_EFFECTS_LEVEL = 3

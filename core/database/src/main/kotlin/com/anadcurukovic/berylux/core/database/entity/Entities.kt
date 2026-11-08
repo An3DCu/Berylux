@@ -20,6 +20,7 @@ data class ProfileEntity(
     val lux: Int = 0,
     @ColumnInfo(name = "pick_seed") val pickSeed: Long,
     @ColumnInfo(name = "created_at") val createdAt: Instant,
+    @ColumnInfo(name = "sigil_seed", defaultValue = "0") val sigilSeed: Long = pickSeed,
 )
 
 @Entity(tableName = "categories")
