@@ -69,7 +69,11 @@ class BeryluxAppTest {
     private fun assertOn(title: String) =
         compose.waitUntilAtLeastOneExists(hasText(title) and isHeading(), timeoutMillis = 5_000)
 
-    private fun tap(text: String) = compose.onNodeWithText(text).performClick()
+    /** Waits for the text first: right after a tab change, the next screen may still be loading. */
+    private fun tap(text: String) {
+        compose.waitUntilAtLeastOneExists(hasText(text), timeoutMillis = 5_000)
+        compose.onNodeWithText(text).performClick()
+    }
 
     private fun pressBack() {
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
