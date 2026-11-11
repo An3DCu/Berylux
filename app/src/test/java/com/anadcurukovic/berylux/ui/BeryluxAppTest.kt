@@ -1,7 +1,10 @@
 package com.anadcurukovic.berylux.ui
 
 import android.os.Looper
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
@@ -20,6 +23,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import com.anadcurukovic.berylux.MainActivity
 import com.anadcurukovic.berylux.core.testing.FakeTimeSource
+import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
@@ -33,6 +37,7 @@ import org.robolectric.annotation.Config
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.math.abs
 
 /**
  * The real app on Robolectric: Hilt, Room, DataStore and every screen, as a player would use it.
@@ -264,6 +269,32 @@ class BeryluxAppTest {
         assertOn("Rivals")
         waitForText("Ledger")
         waitForText("Your first week.")
+    }
+
+    @Test
+    @Config(fontScale = 2f)
+    fun atDoubleTextARivalsLuxSitsUnderItsHabit() {
+        startAs("Sam")
+        tap("Progress")
+        tap("Rivals this week")
+        waitForText("GRINDER")
+        val habit = compose.onNodeWithText("GRINDER", substring = true).fetchSemanticsNode().boundsInRoot
+        val luxLefts = compose.onAllNodes(hasText(" LUX", substring = true)).fetchSemanticsNodes()
+            .map { it.boundsInRoot.left }
+        // Side by side, every Lux would sit to the right of the habits.
+        assertThat(luxLefts.any { abs(it - habit.left) < 1f }).isTrue()
+    }
+
+    @Test
+    fun theNarratorLineIsReadOutOnceItAppears() {
+        startAs("Sam")
+        takeFirstCase(taken = 1)
+        tap("Cases")
+        closeFirstOpenCase()
+        // Its own line, apart from the message bar, which TalkBack reads anyway.
+        val narratorLine = hasText("“", substring = true) and
+            SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite)
+        compose.waitUntilAtLeastOneExists(narratorLine, timeoutMillis = 5_000)
     }
 
     @Test

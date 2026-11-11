@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import com.anadcurukovic.berylux.core.designsystem.Berylux
 
 /** A gem's four tones, from the lit table down to the deepest facet. */
 @Immutable
@@ -41,10 +42,11 @@ object GemPalettes {
 /**
  * A brilliant-cut gem seen from the side. With [sweep] on, a band of light crosses the facets
  * every 4 seconds; that needs AGSL (Android 13 and newer), and older phones get the still gem.
+ * With reduced motion the light holds still.
  */
 @Composable
 fun Gem(palette: GemPalette, contentDescription: String, modifier: Modifier = Modifier, sweep: Boolean = false) {
-    val animate = sweep && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val animate = sweep && !Berylux.reducedMotion && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val phase = if (animate) {
         rememberInfiniteTransition(label = "gem").animateFloat(
             initialValue = 0f,

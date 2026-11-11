@@ -21,6 +21,8 @@ class ContrastTest {
         "text on accent" to (onAccent to accent),
         "ink on paper" to (ink to paper),
         "faded ink on paper" to (inkFaded to paper),
+        "ink on shaded paper" to (ink to paperShade),
+        "faded ink on shaded paper" to (inkFaded to paperShade),
         "stamp on paper" to (stamp to paper),
         "text on stamp" to (onStamp to stamp),
     )

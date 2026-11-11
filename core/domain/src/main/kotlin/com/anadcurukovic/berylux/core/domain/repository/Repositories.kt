@@ -4,6 +4,7 @@ import com.anadcurukovic.berylux.core.model.CaseFile
 import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.Challenge
 import com.anadcurukovic.berylux.core.model.Difficulty
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.Profile
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
@@ -102,6 +103,8 @@ interface SettingsRepository {
     suspend fun setTheme(theme: ThemeMode)
 
     suspend fun setEffectsLevel(level: Int)
+
+    suspend fun setMotion(motion: MotionMode)
 
     /** When the player last looked at Progress; unlocks after it are new. The epoch before the first look. */
     val achievementsSeenAt: Flow<Instant>

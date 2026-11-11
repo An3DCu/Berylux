@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -188,14 +187,14 @@ private fun StreakSection(streak: StreakState) {
     }
 }
 
-/** An earned commendation is a paper card with its date; a sealed one is faded. */
+/** An earned commendation is a paper card with its date; a sealed one is on shaded paper. */
 @Composable
 private fun AchievementCard(item: AchievementUi) {
     val colors = Berylux.colors
     val locale = LocalConfiguration.current.locales[0]
     val formatter = remember(locale) { DateTimeFormatter.ofPattern("dd MMM yyyy", locale) }
     val earned = item.unlockedAt != null
-    CaseCard(modifier = if (earned) Modifier else Modifier.alpha(SEALED_ALPHA)) {
+    CaseCard(shaded = !earned) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = stringResource(item.achievement.titleRes()),
@@ -218,7 +217,6 @@ private fun AchievementCard(item: AchievementUi) {
 }
 
 private const val GEM_SIZE = 72
-private const val SEALED_ALPHA = 0.55f
 
 @Preview
 @Composable

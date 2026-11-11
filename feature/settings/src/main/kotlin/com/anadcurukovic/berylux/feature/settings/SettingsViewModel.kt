@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.anadcurukovic.berylux.core.domain.ChangeDayStartHourUseCase
 import com.anadcurukovic.berylux.core.domain.repository.SettingsRepository
 import com.anadcurukovic.berylux.core.domain.repository.TimeSource
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ sealed interface SettingsUiState {
         val pendingHour: Int?,
         val theme: ThemeMode,
         val effectsLevel: Int,
+        val motion: MotionMode,
     ) : SettingsUiState {
         /** The hour the − and + buttons move from: the waiting one, if there is one. */
         val shownHour: Int get() = pendingHour ?: hour
@@ -36,7 +38,7 @@ sealed interface SettingsUiState {
     data object Error : SettingsUiState
 }
 
-/** The start hour, the theme and the grain and scanlines. Every change is kept at once. */
+/** The start hour, the theme, the grain and scanlines, and motion. Every change is kept at once. */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository,
@@ -63,6 +65,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settings.setEffectsLevel(level) }
     }
 
+    fun onMotion(motion: MotionMode) {
+        viewModelScope.launch { settings.setMotion(motion) }
+    }
+
     private fun moveHour(by: Int) {
         val content = uiState.value as? SettingsUiState.Content ?: return
         val hours = UserSettings.DAY_START_HOURS.count()
@@ -76,6 +82,7 @@ class SettingsViewModel @Inject constructor(
             pendingHour = userSettings.pendingStartHourAt(now),
             theme = userSettings.theme,
             effectsLevel = userSettings.effectsLevel,
+            motion = userSettings.motion,
         )
     }
 

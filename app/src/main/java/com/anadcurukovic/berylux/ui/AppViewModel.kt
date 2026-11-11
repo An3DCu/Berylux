@@ -8,6 +8,7 @@ import com.anadcurukovic.berylux.core.domain.repository.AchievementRepository
 import com.anadcurukovic.berylux.core.domain.repository.ProfileRepository
 import com.anadcurukovic.berylux.core.domain.repository.SettingsRepository
 import com.anadcurukovic.berylux.core.model.Achievement
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,6 +64,11 @@ class AppViewModel @Inject constructor(
     val effectsLevel: StateFlow<Int> = settings.settings
         .map { it.effectsLevel }
         .stateIn(viewModelScope, SharingStarted.Eagerly, UserSettings.DEFAULT_EFFECTS_LEVEL)
+
+    /** Full or reduced motion, or the phone's say; the phone's until the settings are read. */
+    val motion: StateFlow<MotionMode> = settings.settings
+        .map { it.motion }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, MotionMode.FOLLOW_PHONE)
 
     private val unlocks = Channel<Achievement>(Channel.UNLIMITED)
 

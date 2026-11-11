@@ -8,11 +8,27 @@ enum class ThemeMode {
     SYSTEM,
 }
 
+/** How much the app moves: as the phone's animation setting says, always, or calmly. */
+enum class MotionMode {
+    FOLLOW_PHONE,
+    FULL,
+    REDUCED,
+    ;
+
+    /** Whether to move calmly, given whether the phone has turned its animations off. */
+    fun isReduced(phoneRemovesAnimations: Boolean): Boolean = when (this) {
+        FOLLOW_PHONE -> phoneRemovesAnimations
+        FULL -> false
+        REDUCED -> true
+    }
+}
+
 /**
  * @property dayStartHour the hour a new game day starts, 0 to 23.
  * @property nextDayStartHour a new start hour the player picked, waiting for [nextHourFrom]: the end
  *   of the game day it was picked on. Today keeps its end; the new hour starts with the next day.
  * @property effectsLevel how strong grain, scanlines and glow are, 1 (clean) to 5 (heavy).
+ * @property motion full or reduced motion, or whatever the phone's animation setting says.
  */
 data class UserSettings(
     val dayStartHour: Int = DEFAULT_DAY_START_HOUR,
@@ -20,6 +36,7 @@ data class UserSettings(
     val effectsLevel: Int = DEFAULT_EFFECTS_LEVEL,
     val nextDayStartHour: Int? = null,
     val nextHourFrom: Instant? = null,
+    val motion: MotionMode = MotionMode.FOLLOW_PHONE,
 ) {
     /** The hour the game day starts at [instant]: the next hour once its time has come. */
     fun startHourAt(instant: Instant): Int =

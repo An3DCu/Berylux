@@ -1,6 +1,7 @@
 package com.anadcurukovic.berylux.feature.settings
 
 import com.anadcurukovic.berylux.core.domain.ChangeDayStartHourUseCase
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import com.anadcurukovic.berylux.core.testing.FakeSettingsRepository
@@ -32,10 +33,16 @@ class SettingsViewModelTest {
     private fun content() = viewModel.uiState.value as SettingsUiState.Content
 
     @Test
-    fun `it opens with the hour, the theme and the effects in force`() = runTest {
+    fun `it opens with the hour, the theme, the effects and the motion in force`() = runTest {
         keepCollecting()
         assertThat(content()).isEqualTo(
-            SettingsUiState.Content(hour = 4, pendingHour = null, theme = ThemeMode.DARK, effectsLevel = 3),
+            SettingsUiState.Content(
+                hour = 4,
+                pendingHour = null,
+                theme = ThemeMode.DARK,
+                effectsLevel = 3,
+                motion = MotionMode.FOLLOW_PHONE,
+            ),
         )
     }
 
@@ -74,5 +81,13 @@ class SettingsViewModelTest {
         viewModel.onEffectsLevel(5)
         viewModel.onEffectsLevel(9)
         assertThat(settings.settings.first()).isEqualTo(UserSettings(theme = ThemeMode.DAYLIGHT, effectsLevel = 5))
+    }
+
+    @Test
+    fun `a motion pick is kept at once and shows as picked`() = runTest {
+        keepCollecting()
+        viewModel.onMotion(MotionMode.REDUCED)
+        assertThat(settings.settings.first().motion).isEqualTo(MotionMode.REDUCED)
+        assertThat(content().motion).isEqualTo(MotionMode.REDUCED)
     }
 }
