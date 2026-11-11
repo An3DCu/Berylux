@@ -27,16 +27,22 @@ import com.anadcurukovic.berylux.core.designsystem.Spacing
 /**
  * The CLOSED stamp, a double box with the closing date. With [land] on it drops from 1.4 times
  * its size, lands in 180 ms with a short haptic, and its ink spreads over 300 ms; off, it just
- * sits there (an old case, or reduced motion).
+ * sits there (an old case). With reduced motion it appears in place, inked, with the haptic.
  */
 @Composable
 fun ClosedStamp(label: String, date: String, modifier: Modifier = Modifier, land: Boolean = false) {
     val red = Berylux.colors.stamp
-    val drop = remember { Animatable(if (land) DROP_FROM else 1f) }
-    val ink = remember { Animatable(if (land) INK_FROM else 1f) }
+    val calm = Berylux.reducedMotion
+    val moves = land && !calm
+    val drop = remember { Animatable(if (moves) DROP_FROM else 1f) }
+    val ink = remember { Animatable(if (moves) INK_FROM else 1f) }
     val haptics = LocalHapticFeedback.current
     LaunchedEffect(land) {
         if (!land) return@LaunchedEffect
+        if (calm) {
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            return@LaunchedEffect
+        }
         drop.animateTo(1f, tween(LAND_MS, easing = FastOutLinearInEasing))
         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
         ink.animateTo(1f, tween(SPREAD_MS, easing = LinearOutSlowInEasing))

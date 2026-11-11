@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -110,6 +111,11 @@ private fun BoardRowCard(place: Int, row: BoardRow) {
     val sheet = if (row.isYou) colors.paper else colors.raised
     val text = if (row.isYou) colors.ink else colors.onBackground
     val faded = if (row.isYou) colors.inkFaded else colors.onBackgroundFaded
+    // At large text the Lux moves under the habit, which would squeeze into a narrow column.
+    val stacked = LocalDensity.current.fontScale >= STACK_FROM_FONT_SCALE
+    val lux: @Composable () -> Unit = {
+        Text(stringResource(R.string.rivals_lux, row.lux).hud(), style = BeryluxType.Number, color = text)
+    }
     Row(
         modifier = Modifier.fillMaxWidth().background(sheet, CaseCardShape).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -129,10 +135,14 @@ private fun BoardRowCard(place: Int, row: BoardRow) {
                     color = faded,
                 )
             }
+            if (stacked) lux()
         }
-        Text(stringResource(R.string.rivals_lux, row.lux).hud(), style = BeryluxType.Number, color = text)
+        if (!stacked) lux()
     }
 }
+
+/** Text at 150% and up stacks a rival's Lux under its habit. */
+private const val STACK_FROM_FONT_SCALE = 1.5f
 
 private fun Rival.habit(): Int = when (this) {
     Rival.LEDGER -> R.string.rivals_habit_ledger

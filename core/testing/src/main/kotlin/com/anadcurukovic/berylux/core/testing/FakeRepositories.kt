@@ -13,6 +13,7 @@ import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.Challenge
 import com.anadcurukovic.berylux.core.model.Difficulty
 import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.Profile
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
@@ -201,6 +202,8 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
     override suspend fun setTheme(theme: ThemeMode) = state.update { it.copy(theme = theme) }
 
     override suspend fun setEffectsLevel(level: Int) = state.update { it.copy(effectsLevel = level) }
+
+    override suspend fun setMotion(motion: MotionMode) = state.update { it.copy(motion = motion) }
 
     private val seenAt = MutableStateFlow(Instant.EPOCH)
     override val achievementsSeenAt: Flow<Instant> = seenAt

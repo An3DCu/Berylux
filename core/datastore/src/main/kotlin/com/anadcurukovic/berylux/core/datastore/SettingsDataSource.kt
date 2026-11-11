@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +34,9 @@ class SettingsDataSource @Inject constructor(
                 ?: UserSettings.DEFAULT_EFFECTS_LEVEL,
             nextDayStartHour = prefs[NEXT_DAY_START_HOUR]?.takeIf { it in UserSettings.DAY_START_HOURS },
             nextHourFrom = prefs[NEXT_HOUR_FROM]?.let(Instant::ofEpochMilli),
+            motion = prefs[MOTION]
+                ?.let { name -> MotionMode.entries.firstOrNull { it.name == name } }
+                ?: MotionMode.FOLLOW_PHONE,
         )
     }
 
@@ -78,6 +82,10 @@ class SettingsDataSource @Inject constructor(
         dataStore.edit { it[EFFECTS_LEVEL] = level }
     }
 
+    suspend fun setMotion(motion: MotionMode) {
+        dataStore.edit { it[MOTION] = motion.name }
+    }
+
     private companion object {
         val DAY_START_HOUR = intPreferencesKey("day_start_hour")
         val THEME = stringPreferencesKey("theme")
@@ -85,5 +93,6 @@ class SettingsDataSource @Inject constructor(
         val ACHIEVEMENTS_SEEN_AT = longPreferencesKey("achievements_seen_at")
         val NEXT_DAY_START_HOUR = intPreferencesKey("next_day_start_hour")
         val NEXT_HOUR_FROM = longPreferencesKey("next_hour_from")
+        val MOTION = stringPreferencesKey("motion")
     }
 }

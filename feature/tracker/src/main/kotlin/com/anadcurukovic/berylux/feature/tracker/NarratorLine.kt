@@ -6,12 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.anadcurukovic.berylux.core.designsystem.Berylux
 import com.anadcurukovic.berylux.core.designsystem.BeryluxType
 import com.anadcurukovic.berylux.core.domain.Narration
 
-/** The narrator's line under a freshly closed case, in the typewriter. */
+/** The narrator's line under a freshly closed case, in the typewriter. TalkBack reads it once as it appears. */
 @Composable
 internal fun NarratorLine(just: JustClosed, modifier: Modifier = Modifier) {
     val line = when (val narration = just.narration) {
@@ -23,7 +26,9 @@ internal fun NarratorLine(just: JustClosed, modifier: Modifier = Modifier) {
         text = "\u201C$line\u201D",
         style = BeryluxType.Text,
         color = Berylux.colors.onBackgroundFaded,
-        modifier = modifier.padding(horizontal = 4.dp),
+        modifier = modifier
+            .padding(horizontal = 4.dp)
+            .semantics { liveRegion = LiveRegionMode.Polite },
     )
 }
 

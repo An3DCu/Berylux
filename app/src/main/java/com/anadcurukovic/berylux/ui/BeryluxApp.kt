@@ -24,11 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.anadcurukovic.berylux.R
+import com.anadcurukovic.berylux.core.designsystem.Berylux
+import com.anadcurukovic.berylux.core.designsystem.BeryluxType
 import com.anadcurukovic.berylux.core.navigation.CategoryRoute
 import com.anadcurukovic.berylux.core.navigation.EditorRoute
 import com.anadcurukovic.berylux.core.navigation.Navigator
@@ -37,6 +40,7 @@ import com.anadcurukovic.berylux.core.navigation.RivalsRoute
 import com.anadcurukovic.berylux.core.navigation.SettingsRoute
 import com.anadcurukovic.berylux.core.navigation.TodayRoute
 import com.anadcurukovic.berylux.core.navigation.rememberNavigationState
+import com.anadcurukovic.berylux.core.navigation.tab
 import com.anadcurukovic.berylux.core.ui.titleRes
 import com.anadcurukovic.berylux.feature.catalog.catalogEntries
 import com.anadcurukovic.berylux.feature.editor.editorEntries
@@ -106,7 +110,8 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
                             Icon(painterResource(tab.icon), contentDescription = null)
                         }
                     },
-                    label = { Text(tab.label) },
+                    // Bebas, all capitals like the buttons: narrow enough to stay on one line at 200% text.
+                    label = { Text(tab.label, style = TabLabel, maxLines = 1) },
                 )
             }
         },
@@ -114,9 +119,14 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
         // Unlock messages drop in at the top of whatever screen is open; a screen's own
         // messages keep the bottom, so both can show at once.
         Box {
+            val calm = Berylux.reducedMotion
             NavDisplay(
                 entries = state.toDecoratedEntries(entryProvider),
                 onBack = { navigator.goBack() },
+                transitionSpec = { sceneTransition(back = false, calm) },
+                popTransitionSpec = { sceneTransition(back = true, calm) },
+                // The back gesture drives the same slide as the back button.
+                predictivePopTransitionSpec = { sceneTransition(back = true, calm) },
             )
             // The screens draw edge to edge. Without this strip, a scrolled list shows through
             // the clock and the status icons.
@@ -133,3 +143,6 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
         }
     }
 }
+
+private const val TAB_LABEL_SP = 13
+private val TabLabel = BeryluxType.Button.copy(fontSize = TAB_LABEL_SP.sp)

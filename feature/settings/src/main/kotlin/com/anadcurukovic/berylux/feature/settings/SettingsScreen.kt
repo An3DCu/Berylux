@@ -40,6 +40,7 @@ import com.anadcurukovic.berylux.core.designsystem.component.CaseCard
 import com.anadcurukovic.berylux.core.designsystem.component.StampButton
 import com.anadcurukovic.berylux.core.designsystem.component.StampOutlineButton
 import com.anadcurukovic.berylux.core.designsystem.hud
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import java.time.LocalTime
@@ -56,12 +57,13 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
             onLater = viewModel::onLater,
             onTheme = viewModel::onTheme,
             onEffectsLevel = viewModel::onEffectsLevel,
+            onMotion = viewModel::onMotion,
             contentPadding = padding,
         )
     }
 }
 
-/** Settings, stateless: three cards, the start hour, the theme, and the grain and scanlines. */
+/** Settings, stateless: four cards, the start hour, the theme, the grain and scanlines, and motion. */
 @Composable
 fun SettingsContent(
     state: SettingsUiState,
@@ -69,6 +71,7 @@ fun SettingsContent(
     onLater: () -> Unit,
     onTheme: (ThemeMode) -> Unit,
     onEffectsLevel: (Int) -> Unit,
+    onMotion: (MotionMode) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -95,6 +98,7 @@ fun SettingsContent(
             HourCard(state, onEarlier, onLater)
             ThemeCard(state.theme, onTheme)
             EffectsCard(state.effectsLevel, onEffectsLevel)
+            MotionCard(state.motion, onMotion)
         }
     }
 }
@@ -225,11 +229,18 @@ private const val SEGMENT_BAR = 8
 private fun SettingsPreview() {
     BeryluxTheme {
         SettingsContent(
-            state = SettingsUiState.Content(hour = 4, pendingHour = 6, theme = ThemeMode.DARK, effectsLevel = 3),
+            state = SettingsUiState.Content(
+                hour = 4,
+                pendingHour = 6,
+                theme = ThemeMode.DARK,
+                effectsLevel = 3,
+                motion = MotionMode.FOLLOW_PHONE,
+            ),
             onEarlier = {},
             onLater = {},
             onTheme = {},
             onEffectsLevel = {},
+            onMotion = {},
         )
     }
 }

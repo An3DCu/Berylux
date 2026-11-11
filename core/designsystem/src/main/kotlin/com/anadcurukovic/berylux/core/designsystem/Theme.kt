@@ -10,15 +10,16 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 private val LocalBeryluxColors = staticCompositionLocalOf { DeskColors }
+private val LocalReducedMotion = staticCompositionLocalOf { false }
 
 /**
  * Berylux's theme. [daylight] picks the case paper colors over the dark desk. The Material
  * roles are filled from the same colors, so the Material pieces the screens still use match.
  */
 @Composable
-fun BeryluxTheme(daylight: Boolean = false, content: @Composable () -> Unit) {
+fun BeryluxTheme(daylight: Boolean = false, reducedMotion: Boolean = false, content: @Composable () -> Unit) {
     val colors = if (daylight) CasePaperColors else DeskColors
-    CompositionLocalProvider(LocalBeryluxColors provides colors) {
+    CompositionLocalProvider(LocalBeryluxColors provides colors, LocalReducedMotion provides reducedMotion) {
         MaterialTheme(
             colorScheme = colors.toMaterial(),
             typography = BeryluxTypography,
@@ -33,6 +34,11 @@ object Berylux {
     val colors: BeryluxColors
         @Composable @ReadOnlyComposable
         get() = LocalBeryluxColors.current
+
+    /** Calm motion: no movement between screens, the stamp, the sign and the gem held still. */
+    val reducedMotion: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalReducedMotion.current
 }
 
 /** Until the screens are restyled, Material's surfaces are desk tones and its text is chalk or ink. */

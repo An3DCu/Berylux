@@ -20,19 +20,21 @@ import com.anadcurukovic.berylux.core.designsystem.Spacing
 
 /**
  * A sheet from the case file: paper with two corners cut, ink for its text. [caseNumber] is the
- * case's id, shown as "CASE NO. 0412"; a challenge that isn't a case yet has none.
+ * case's id, shown as "CASE NO. 0412"; a challenge that isn't a case yet has none. A [shaded]
+ * sheet is on the darker paper, for one that isn't open to the player yet.
  */
 @Composable
 fun CaseCard(
     modifier: Modifier = Modifier,
     caseNumber: Long? = null,
+    shaded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = Berylux.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.paper, CaseCardShape)
+            .background(if (shaded) colors.paperShade else colors.paper, CaseCardShape)
             .padding(Spacing.Large),
         verticalArrangement = Arrangement.spacedBy(Spacing.XSmall),
     ) {

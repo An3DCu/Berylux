@@ -45,22 +45,35 @@ class NavigationState(
     val currentKey: NavKey
         get() = backStacks.getValue(topLevelRoute).last()
 
-    /** Turns the stacks in use into entries, each stack with its own saved state and ViewModels. */
+    /**
+     * Turns the stacks in use into entries, each stack with its own saved state and ViewModels.
+     * Each entry carries the position of its tab, read back with [tab].
+     */
     @Composable
     fun toDecoratedEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
-        val decorated = backStacks.mapValues { (_, stack) ->
+        val decorated = backStacks.mapValues { (route, stack) ->
+            val tab = topLevelRoutes.indexOf(route)
             rememberDecoratedNavEntries(
                 backStack = stack,
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
-                entryProvider = entryProvider,
+                entryProvider = { key -> entryProvider(key).inTab(key, tab) },
             )
         }
         return stacksInUse.flatMap { decorated[it].orEmpty() }
     }
 }
+
+/** The position of the tab this entry belongs to, left to right; null for an entry from elsewhere. */
+val NavEntry<*>.tab: Int?
+    get() = metadata[TAB] as? Int
+
+private fun NavEntry<NavKey>.inTab(key: NavKey, tab: Int): NavEntry<NavKey> =
+    NavEntry(key, contentKey, metadata + (TAB to tab)) { Content() }
+
+private const val TAB = "berylux.tab"
 
 /** Creates the state once and keeps it through rotation and process death. */
 @Composable

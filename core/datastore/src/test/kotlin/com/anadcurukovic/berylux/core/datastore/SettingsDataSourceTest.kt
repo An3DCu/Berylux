@@ -3,6 +3,7 @@ package com.anadcurukovic.berylux.core.datastore
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
 import com.google.common.truth.Truth.assertThat
@@ -56,6 +57,17 @@ class SettingsDataSourceTest {
         val source = SettingsDataSource(newStore())
         assertThrows(IllegalArgumentException::class.java) { runBlocking { source.setDayStartHour(24) } }
         assertThrows(IllegalArgumentException::class.java) { runBlocking { source.setEffectsLevel(0) } }
+    }
+
+    @Test
+    fun `motion is kept, and an unknown one reads as following the phone`() = runTest {
+        val store = newStore()
+        val source = SettingsDataSource(store)
+        source.setMotion(MotionMode.REDUCED)
+        assertThat(source.settings.first().motion).isEqualTo(MotionMode.REDUCED)
+
+        store.edit { it[stringPreferencesKey("motion")] = "SLOW" }
+        assertThat(source.settings.first().motion).isEqualTo(MotionMode.FOLLOW_PHONE)
     }
 
     @Test

@@ -24,6 +24,7 @@ import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.Challenge
 import com.anadcurukovic.berylux.core.model.Difficulty
 import com.anadcurukovic.berylux.core.model.MY_CASES_CATEGORY_ID
+import com.anadcurukovic.berylux.core.model.MotionMode
 import com.anadcurukovic.berylux.core.model.Profile
 import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.model.UserSettings
@@ -147,6 +148,8 @@ internal class OfflineSettingsRepository @Inject constructor(
     override suspend fun setTheme(theme: ThemeMode) = source.setTheme(theme)
 
     override suspend fun setEffectsLevel(level: Int) = source.setEffectsLevel(level)
+
+    override suspend fun setMotion(motion: MotionMode) = source.setMotion(motion)
 
     override val achievementsSeenAt: Flow<Instant> = source.achievementsSeenAt
 

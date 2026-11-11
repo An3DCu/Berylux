@@ -21,5 +21,11 @@
     <!-- For TalkBack on each of the five segments. -->
     <string name="settings_effects_set" tools:ignore="PluralsCandidate">Grain and scanlines: %1$d of %2$d</string>
 
+    <string name="settings_motion_title">Motion</string>
+    <string name="settings_motion_phone">Follow the phone</string>
+    <string name="settings_motion_full">Full</string>
+    <string name="settings_motion_reduced">Reduced</string>
+    <string name="settings_motion_note">Reduced keeps the stamp, the sign and the gem still.</string>
+
     <string name="settings_error">Settings wouldn\'t open. Restart the app to try again.</string>
 </resources>
