@@ -277,6 +277,10 @@ class BeryluxAppTest {
         startAs("Sam")
         tap("Progress")
         tap("Rivals this week")
+        // The board's order comes from the profile's random seed. At this size Grindstone can be
+        // below the fold, and the list only builds the rows on screen.
+        assertOn("Rivals")
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("GRINDER", substring = true))
         waitForText("GRINDER")
         val habit = compose.onNodeWithText("GRINDER", substring = true).fetchSemanticsNode().boundsInRoot
         val luxLefts = compose.onAllNodes(hasText(" LUX", substring = true)).fetchSemanticsNodes()
