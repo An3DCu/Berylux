@@ -12,29 +12,41 @@ Habit apps tend to be either a plain checklist or a pile of streak pressure. Ber
 
 It works fully offline. Signing in will be optional and syncs with my own server ([roadmap](#roadmap)).
 
-This is a work in progress. Version 0.2 is the whole game, played offline as a guest, on plain Material 3. The noir case-file look comes in v0.3.
+This is a work in progress. Version 0.3 is the whole game, played offline as a guest, in its own look: a case file on a dark desk, with red beryl as the only accent.
 
-## Features in v0.2
+## Features in v0.3
 
 - **Start:** pick a name and a generated sigil. No account.
-- **Today:** the daily case, a bonus case and four picks, your rank and Lux, and how many of the day's 5 slots are used.
-- **Cases:** close a case for its Lux, or drop it for 5 Lux. Both ask first. A case still open when the day ends at 4 AM goes cold. Earlier days are listed below today's.
+- **Today:** the daily case, a bonus case and four picks, your rank and Lux, and how many of the day's 5 slots are used. The BERYLUX sign lights a letter for each day of your streak.
+- **Cases:** close a case for its Lux, or drop it for 5 Lux. Both ask first. A closed case gets the CLOSED stamp and a line from the narrator. A case still open when the day ends goes cold. Earlier days are listed below today's.
 - **Catalog:** 56 challenges in 7 categories, filtered by difficulty ([`challenges.json`](core/database/src/main/assets/seed/challenges.json)). Write your own in My cases, and change or delete them. Your own give no Lux, but they count for the streak.
-- **Progress:** six gem ranks from goshenite to red beryl, the streak with earned freezes, and 17 achievements that unlock as you play.
+- **Progress:** six gem ranks from goshenite to red beryl, each with its own gem, the streak with earned freezes, and 17 commendations that unlock as you play.
 - **Rivals:** a weekly board against five bots, each with its own habit. They're marked as bots. Their Lux comes from a seed, and the board is the same on every launch.
-- **Tests:** 197 tests on the JVM, an instrumented test of the main flow, and CI on every pull request.
+- **Profile and Settings:** change your name and sigil. Pick the hour the day starts, the theme (dark desk or case paper), the grain and scanlines, and full or reduced motion.
+- **Accessibility:** text up to 200%, TalkBack labels on every drawn piece, contrast of at least 4.5:1 in both themes, touch targets of at least 48dp.
+- **Tests:** 244 tests on the JVM, screenshot tests of the drawn pieces, an instrumented test of the main flow, and CI on every pull request.
+
+## Screenshots
+
+<p>
+  <img src="docs/screenshots/v0.3/today.png" width="160" alt="Today: the BERYLUX sign, the day's slots and the daily case on paper">
+  <img src="docs/screenshots/v0.3/cases.png" width="160" alt="Cases: a closed case with the CLOSED stamp and a narrator line">
+  <img src="docs/screenshots/v0.3/archive.png" width="160" alt="The Archive: the categories as numbered files">
+  <img src="docs/screenshots/v0.3/progress.png" width="160" alt="Progress: the rank's gem, the ruler and the streak sign">
+</p>
 
 ## Tech stack
 
 | Layer | Tools |
 |---|---|
 | Language | Kotlin 2.4, Java 17 bytecode |
-| UI | Jetpack Compose, Material 3 |
+| UI | Jetpack Compose, Material 3 under my own design system |
+| Graphics | Compose Canvas, AGSL shaders on Android 13 and newer |
 | Architecture | MVVM, one-way data flow, 18 Gradle modules with convention plugins |
 | Dependency injection | Hilt |
 | Data | Room, DataStore |
 | Navigation | Navigation 3 |
-| Testing | JUnit 4, Truth, Turbine, Robolectric, Compose UI tests |
+| Testing | JUnit 4, Truth, Turbine, Robolectric, Compose UI tests, Roborazzi screenshots |
 | Quality and CI | detekt, Android Lint, GitHub Actions |
 
 ## Architecture
@@ -62,7 +74,7 @@ core/
   database/        Room tables, DAOs, the seed and the exported schema
   datastore/       settings
   navigation/      route keys, back stacks, the navigator
-  designsystem/    theme (v0.3)
+  designsystem/    colors, type, shapes, and the drawn gems, sign, stamp and grain
   ui/              shared screen pieces
   testing/         fakes for every repository
 feature/           today, tracker, catalog, editor, progress, rivals, profile, settings
@@ -72,7 +84,7 @@ feature/           today, tracker, catalog, editor, progress, rivals, profile, s
 
 Five tables: `profiles`, `categories`, `challenges`, `cases` and `achievement_unlocks`. A case links a profile to a challenge and records its status (open, closed, cold or dropped), when it was accepted and closed, on which game day, and the Lux it earned. Deleting one of your own challenges deletes its cases with it. Streaks are counted from the days with a closed case. There's no separate streak table to keep in sync.
 
-The challenges are written to the database inside Room's own create step, before the first query can run ([`Seed.kt`](core/database/src/main/kotlin/com/anadcurukovic/berylux/core/database/seed/Seed.kt)). The schema is exported to [`core/database/schemas`](core/database/schemas). Version 2 changed a foreign key and added My cases; a test runs the migration from version 1 ([`Migrations.kt`](core/database/src/main/kotlin/com/anadcurukovic/berylux/core/database/Migrations.kt)).
+The challenges are written to the database inside Room's own create step, before the first query can run ([`Seed.kt`](core/database/src/main/kotlin/com/anadcurukovic/berylux/core/database/seed/Seed.kt)). The schema is exported to [`core/database/schemas`](core/database/schemas). Version 2 changed a foreign key and added My cases. Version 3 gave the sigil a seed of its own. Tests run both migrations ([`Migrations.kt`](core/database/src/main/kotlin/com/anadcurukovic/berylux/core/database/Migrations.kt)).
 
 ## Getting started
 
@@ -139,22 +151,22 @@ On macOS and Linux, use `./gradlew` instead of `.\gradlew.bat`.
 | The clock is an interface that tests replace | The app tests move the clock past 4 AM and check that open cases go cold and the streak moves on | Code asks the clock for the time instead of calling `Instant.now()` |
 | Rival bots play from a seed, not from a server | The board looks alive offline and never changes between launches | Bots don't react to you; an online board comes in v0.5 |
 | An achievement, once unlocked, stays | Dropping a case or deleting a challenge never takes a badge back | The badge list can show more than the current record would earn |
+| The gems, the sign, the stamp, the grain and the icon are drawn in code | No image files to license or scale, and the gem's light can move | Below Android 13 the gem is still; its light needs AGSL |
+| Screenshot tests run on the JVM with Roborazzi | CI checks the look on every pull request without an emulator | The images are recorded on Windows and compared on Linux, with 1% of pixels allowed to differ |
 
 ## Limitations
 
-- Plain Material 3 for now. The case-file look comes in v0.3.
-- Profile and Settings are placeholders. Changing your name and sigil, the day's start hour and the theme come in v0.3.
+- A whole day hasn't been played with TalkBack by hand yet. The labels are checked along a day, and a test covers the narrator line.
 - One guest profile per phone, and nothing leaves it. A backup or sync comes with accounts in v0.5.
 - No reminders yet: the app only knows about a day when you open it.
 - No APK to download yet.
-- On Android 8 in light mode, the status bar icons are dark on the dark app. The theme in v0.3 fixes it.
 - Release builds aren't shrunk with R8 yet.
 
 ## Roadmap
 
 - [x] v0.1 Foundation: rules, database, navigation, CI
 - [x] v0.2 Core loop: the whole game offline as a guest
-- [ ] v0.3 Character: the case-file and netrunner look, generated gems, the neon streak sign
+- [x] v0.3 Character: the case-file look, generated gems, the streak sign, motion and accessibility
 - [ ] v0.4 Device: reminders, a home screen widget, history and stats
 - [ ] v0.5 Cloud: optional accounts, sync and an online leaderboard, with my own API
 - [ ] v1.0 Publish: a signed APK, hardened and documented
@@ -162,7 +174,8 @@ On macOS and Linux, use `./gradlew` instead of `.\gradlew.bat`.
 ## Credits and license
 
 - Started as a university project at IBU (International Burch University), rebuilt from scratch afterwards.
-- The challenges were written for this app.
+- The challenges were written for this app. The gems, the sign, the stamp, the grain and the icon are drawn in code for it.
+- Fonts: Bebas Neue and IBM Plex Mono (SIL Open Font License 1.1), Special Elite (Apache 2.0). Their licenses are in [licenses/fonts](licenses/fonts).
 - Libraries are used under their own licenses, mostly Apache 2.0.
 - License: Apache 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
