@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.berylux.jvm.library)
+    // Coverage for the rules; the CI log prints it.
+    alias(libs.plugins.kover)
 }
 
 dependencies {
