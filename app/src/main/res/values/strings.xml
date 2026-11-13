@@ -7,4 +7,11 @@
     <string name="reminder_channel">Morning docket</string>
     <string name="reminder_title">Today\'s docket is in.</string>
     <string name="reminder_text">%1$s leads the day.</string>
+    <!-- The launcher's shortcuts: short labels stay under about 10 letters; long ones show where they fit. -->
+    <string name="shortcut_cases_short">Case files</string>
+    <string name="shortcut_cases_long">Case files</string>
+    <string name="shortcut_today_short">Docket</string>
+    <string name="shortcut_today_long">Today\'s docket</string>
+    <string name="shortcut_write_short">Write</string>
+    <string name="shortcut_write_long">Write a case</string>
 </resources>

@@ -16,12 +16,16 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import com.anadcurukovic.berylux.MainActivity
+import com.anadcurukovic.berylux.R
 import com.anadcurukovic.berylux.core.testing.FakeTimeSource
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -34,6 +38,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.xmlpull.v1.XmlPullParser
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -323,6 +328,48 @@ class BeryluxAppTest {
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(categoryRow)
         compose.onAllNodes(categoryRow).assertCountEquals(1)
         compose.onAllNodesWithText("Nothing closed yet", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    @Config(qualifiers = "w1280dp-h800dp-land")
+    fun onAWideScreenTheTabsMoveToARailAndScreensKeepAReadingWidth() {
+        startAs("Sam")
+        val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+        val tab = compose.onNodeWithText("Progress").fetchSemanticsNode().boundsInRoot
+        val heading = compose.onNode(hasText("Daily case") and isHeading()).fetchSemanticsNode().boundsInRoot
+        with(compose.density) {
+            // The tabs sit in a rail on the left, not in a bar along the bottom.
+            assertThat(tab.right).isLessThan(120.dp.toPx())
+            assertThat(tab.bottom).isLessThan(root.bottom - 120.dp.toPx())
+            // The screen is 720dp wide in the middle of what the rail leaves: at least
+            // (1280 - 120 - 720) / 2 = 220dp in from the rail.
+            assertThat(heading.left).isGreaterThan(tab.right + 220.dp.toPx())
+        }
+    }
+
+    @Test
+    fun eachShortcutOpensItsPlace() {
+        startAs("Sam")
+        val context = compose.activity
+        val parser = context.resources.getXml(R.xml.shortcuts)
+        val actions = buildList {
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                if (parser.eventType == XmlPullParser.START_TAG && parser.name == "intent") {
+                    add(parser.getAttributeValue("http://schemas.android.com/apk/res/android", "action"))
+                }
+            }
+        }
+        // Case files, Today's docket and Write a case, in the launcher's order.
+        assertThat(actions.map { MainActivity.destinationOf(it) })
+            .containsExactly(Destination.CASES, Destination.TODAY, Destination.WRITE_CASE).inOrder()
+
+        val app = ViewModelProvider(compose.activity)[AppViewModel::class.java]
+        app.open(Destination.CASES)
+        assertOn("Case files")
+        app.open(Destination.WRITE_CASE)
+        assertOn("Write a case")
+        app.open(Destination.TODAY)
+        assertOn("Daily case")
     }
 
     @Test

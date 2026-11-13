@@ -28,6 +28,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
+/** Where a link from outside the app opens it. */
+enum class Destination {
+    TODAY,
+    CASES,
+
+    /** The editor, for a new case of the player's own. */
+    WRITE_CASE,
+}
+
 sealed interface AppState {
     data object Loading : AppState
 
@@ -70,13 +79,13 @@ class AppViewModel @Inject constructor(
         .map { it.motion }
         .stateIn(viewModelScope, SharingStarted.Eagerly, MotionMode.FOLLOW_PHONE)
 
-    private val todayRequests = Channel<Unit>(Channel.CONFLATED)
+    private val opens = Channel<Destination>(Channel.CONFLATED)
 
-    /** Each time the morning docket is tapped: the tabs move to Today. */
-    val openTodayFlow: Flow<Unit> = todayRequests.receiveAsFlow()
+    /** Each time the app is opened at a place from outside: the morning docket, a widget, a shortcut. */
+    val openFlow: Flow<Destination> = opens.receiveAsFlow()
 
-    fun openToday() {
-        todayRequests.trySend(Unit)
+    fun open(destination: Destination) {
+        opens.trySend(destination)
     }
 
     private val closeRequests = Channel<Long>(Channel.CONFLATED)
