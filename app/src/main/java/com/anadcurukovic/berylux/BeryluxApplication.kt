@@ -15,8 +15,8 @@ import javax.inject.Inject
 
 /**
  * Hilt builds the app-wide object graph from here: database, settings, repositories. WorkManager
- * starts from here too, with Hilt's factory, so the reminder's and the widgets' workers get their
- * repositories. The home screen widgets are kept in step from here while the app runs.
+ * starts from here too, with Hilt's factory, which hands the reminder's and the widgets' workers
+ * their repositories. The home screen widgets are kept in step from here while the app runs.
  */
 @HiltAndroidApp
 class BeryluxApplication : Application(), Configuration.Provider {

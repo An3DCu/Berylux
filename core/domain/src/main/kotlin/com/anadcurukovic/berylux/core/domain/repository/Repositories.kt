@@ -24,14 +24,14 @@ interface ProfileRepository {
     val profile: Flow<Profile?>
 
     /**
-     * [pickSeed] drives the daily pick and the rivals; the sigil starts from it too, so the welcome
+     * [pickSeed] drives the daily pick and the rivals; the sigil starts from it too. The welcome
      * screen can show the sigil first.
      */
     suspend fun createGuest(name: String, pickSeed: Long): Profile
 
     suspend fun rename(profileId: Long, name: String)
 
-    /** A new sigil. The pick seed stays, so the day's picks and the rivals don't change. */
+    /** A new sigil. The pick seed stays. The day's picks and the rivals don't change. */
     suspend fun setSigilSeed(profileId: Long, seed: Long)
 
     suspend fun addLux(profileId: Long, amount: Int)
@@ -48,7 +48,7 @@ interface ChallengeRepository {
 
     /**
      * Custom challenges always go in "My cases". They have no difficulty: the column can't be
-     * empty, so they're stored as [Difficulty.EASY], which no screen or rule ever reads.
+     * empty. They're stored as [Difficulty.EASY], which no screen or rule ever reads.
      */
     suspend fun addCustom(title: String, description: String): Long
 

@@ -161,7 +161,7 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
         },
     ) {
         // Unlock messages drop in at the top of whatever screen is open; a screen's own
-        // messages keep the bottom, so both can show at once.
+        // messages keep the bottom. Both can show at once.
         // On a wide screen the screens keep to a reading width in the middle; the desk fills the rest.
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             val calm = Berylux.reducedMotion

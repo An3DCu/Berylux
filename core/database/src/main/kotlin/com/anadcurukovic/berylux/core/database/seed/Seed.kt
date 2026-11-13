@@ -45,7 +45,7 @@ data class SeedChallenge(
 
 /**
  * Writes the seed when the database file is first created. It runs inside Room's create
- * transaction, before any query can see the database, so the first screen never finds it empty.
+ * transaction, before any query can see the database. The first screen never finds it empty.
  */
 class SeedCallback(private val loadSeed: () -> SeedData) : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {

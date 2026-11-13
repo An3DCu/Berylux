@@ -91,7 +91,7 @@ data class CaseEntity(
 
 /**
  * Which achievements a profile has unlocked. The achievements themselves are rules in code
- * (core loop round), so only the key and the moment are stored.
+ * (core loop round). Only the key and the moment are stored.
  */
 @Entity(
     tableName = "achievement_unlocks",

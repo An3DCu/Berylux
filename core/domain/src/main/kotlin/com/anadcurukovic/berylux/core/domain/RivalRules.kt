@@ -25,7 +25,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 
 /**
- * The bots' Lux. Each day's number comes from the player's seed, the bot and the day, so it's the
+ * The bots' Lux. Each day's number comes from the player's seed, the bot and the day. It's the
  * same on every launch and every device, and two players get different bots.
  */
 object RivalRules {
@@ -104,7 +104,7 @@ class RivalBoardUseCase @Inject constructor(
     private val settings: SettingsRepository,
     private val time: TimeSource,
 ) {
-    /** Recomputed once every [tick], so the bots' Lux grows through the day. */
+    /** Recomputed once every [tick]. The bots' Lux grows through the day. */
     @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(tick: kotlin.time.Duration = 1.minutes): Flow<RivalBoard> {
         val ticks = flow {
@@ -120,7 +120,7 @@ class RivalBoardUseCase @Inject constructor(
         }
     }
 
-    /** Both sides count from the day the player started, so a first week is a fair one. */
+    /** Both sides count from the day the player started. A first week is a fair one. */
     private fun board(files: List<CaseFile>, profile: Profile, now: Instant, startHour: Int): RivalBoard {
         val zone = time.zone()
         val seed = profile.pickSeed

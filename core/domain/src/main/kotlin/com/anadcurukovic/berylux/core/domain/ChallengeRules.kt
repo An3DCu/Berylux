@@ -20,7 +20,7 @@ object ChallengeRules {
     /** The description as it's stored: trimmed at both ends, its line breaks kept. */
     fun cleanDescription(description: String): String = description.trim()
 
-    /** Every problem with the form, so the screen can show each one at its field. */
+    /** Every problem with the form. The screen shows each one at its field. */
     fun problems(title: String, description: String): Set<ChallengeProblem> = buildSet {
         val cleanTitle = cleanTitle(title)
         if (cleanTitle.isEmpty()) add(ChallengeProblem.TITLE_EMPTY)

@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.first
 
 /** The sign: BERYLUX lit for the streak, the day under it. A tap opens Today. */
 class SignWidget : GlanceAppWidget() {
-    // The sign is drawn for the widget's own size, so it fills the width at any size.
+    // The sign is drawn for the widget's own size. It fills the width at any size.
     override val sizeMode: SizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {

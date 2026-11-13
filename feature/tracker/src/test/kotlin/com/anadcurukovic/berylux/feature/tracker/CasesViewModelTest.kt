@@ -70,7 +70,7 @@ class CasesViewModelTest {
 
     private fun content(vm: CasesViewModel = viewModel) = vm.uiState.value as CasesUiState.Content
 
-    /** Takes a case, a minute after the one before, so the order is known. */
+    /** Takes a case, a minute after the one before. The order is known. */
     private var minute = 0L
 
     private suspend fun take(challengeId: Long, on: LocalDate = today): Long =

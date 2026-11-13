@@ -67,7 +67,7 @@ class FakeChallengeRepository(
     private val categoryState = MutableStateFlow(categories)
     private val challengeState = MutableStateFlow(challenges)
 
-    /** Called with the id of a deleted challenge, so the fake cases can go with it. */
+    /** Called with the id of a deleted challenge. The fake cases go with it. */
     internal var onDeleted: (Long) -> Unit = {}
 
     override val categories: Flow<List<Category>> = categoryState

@@ -11,7 +11,7 @@ class RoomConventionPlugin : Plugin<Project> {
         pluginManager.apply("com.google.devtools.ksp")
         pluginManager.apply("androidx.room")
         extensions.configure<RoomExtension> {
-            // The exported schemas are committed, so every migration can be tested against the real old schema.
+            // The exported schemas are committed. Each migration is tested against the schema it starts from.
             schemaDirectory("$projectDir/schemas")
         }
         dependencies {

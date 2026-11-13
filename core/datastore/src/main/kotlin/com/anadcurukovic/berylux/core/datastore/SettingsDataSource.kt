@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 /**
  * The player's settings, kept in Preferences DataStore. A missing or broken value reads as its
- * default, so a bad file can't break the app.
+ * default. A bad file can't break the app.
  */
 class SettingsDataSource @Inject constructor(
     private val dataStore: DataStore<Preferences>,
@@ -55,7 +55,7 @@ class SettingsDataSource @Inject constructor(
 
     /**
      * The start hour now, and the one that takes over at [from]; both null clear a waiting change.
-     * Written together, so the clock never reads one without the other.
+     * Written together. The clock never reads one without the other.
      */
     suspend fun scheduleDayStartHour(current: Int, next: Int?, from: Instant?) {
         require(current in UserSettings.DAY_START_HOURS) { "hour must be 0 to 23, was $current" }
@@ -103,7 +103,7 @@ class SettingsDataSource @Inject constructor(
         dataStore.edit { it[REMINDER_MINUTE] = time.toSecondOfDay() / SECONDS_IN_MINUTE.toInt() }
     }
 
-    /** Written together, so the offer can't come back after a yes. */
+    /** Written together. The offer can't come back after a yes. */
     suspend fun answerReminderOffer(yes: Boolean) {
         dataStore.edit { prefs ->
             prefs[REMINDER_ASKED] = true

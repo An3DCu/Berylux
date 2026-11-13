@@ -73,7 +73,7 @@ class BeryluxAppTest {
         compose.waitForIdle()
     }
 
-    // Room answers on its own threads, so wait for text instead of assuming it's there.
+    // Room answers on its own threads. Wait for text instead of assuming it's there.
     private fun waitForText(text: String) =
         compose.waitUntilAtLeastOneExists(hasText(text, substring = true), timeoutMillis = 5_000)
 
@@ -193,7 +193,7 @@ class BeryluxAppTest {
         tap("Edit")
         assertOn("Edit the case")
         tap("Delete")
-        // The case is still open, so no streak day can go with it.
+        // The case is still open. No streak day can go with it.
         waitForText("Its case goes with it.")
         compose.onAllNodesWithText("may leave your streak", substring = true).assertCountEquals(0)
         compose.onAllNodesWithText("Delete").onLast().performClick()

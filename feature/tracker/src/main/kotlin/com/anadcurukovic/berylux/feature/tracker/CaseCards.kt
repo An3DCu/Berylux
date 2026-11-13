@@ -36,7 +36,7 @@ internal fun CaseFileCard(
     stampLands: Boolean = false,
 ) {
     val colors = Berylux.colors
-    // Your own challenges give no Lux, so they show none; a drop still costs it.
+    // Your own challenges give no Lux. They show none; a drop still costs it.
     val custom = case.file.challenge.isCustom
     val luxLine = when (case.status) {
         CaseStatus.OPEN -> if (custom) "" else stringResource(R.string.cases_lux_pays, case.lux)
