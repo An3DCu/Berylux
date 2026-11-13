@@ -12,6 +12,8 @@ roborazzi {
 dependencies {
     api(libs.androidx.compose.material3)
     api(libs.androidx.compose.ui)
+    // Bitmaps and fonts for the widgets' pictures.
+    implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit4)
     testImplementation(libs.truth)

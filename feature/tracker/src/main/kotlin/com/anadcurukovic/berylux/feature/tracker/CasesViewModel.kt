@@ -155,6 +155,15 @@ class CasesViewModel @Inject constructor(
 
     fun onDrop(case: CaseUi) = ask(case, DROP)
 
+    /**
+     * Close was tapped outside Cases, on the home screen widget: ask "Close it?" for [caseId]. A case
+     * that's no longer open on today's desk asks nothing.
+     */
+    fun onCloseAsked(caseId: Long) {
+        savedState[PENDING_ID] = caseId
+        savedState[PENDING_KIND] = CLOSE
+    }
+
     /** The player left Cases: the stamp and the narrator's line are done. */
     fun onLeave() {
         justClosed.value = null

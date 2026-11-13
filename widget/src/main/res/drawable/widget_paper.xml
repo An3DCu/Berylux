@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The case paper with two clipped corners, top right and bottom left. It stretches to fit, and
+     the cuts stay the same share of each side. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:fillColor="@color/widget_paper"
+        android:pathData="M0,0 L95,0 L100,12 L100,100 L5,100 L0,88 Z" />
+</vector>

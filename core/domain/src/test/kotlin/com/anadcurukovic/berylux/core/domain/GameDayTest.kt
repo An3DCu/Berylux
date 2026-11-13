@@ -60,6 +60,24 @@ class GameDayTest {
     }
 
     @Test
+    fun `a day ends at the next start hour, even when it began before midnight`() {
+        // 15:00 local on 12 November ends at 4 AM on the 13th, 03:00 UTC.
+        assertThat(GameDay.endOf(Instant.parse("2026-11-12T14:00:00Z"), sarajevo, 4))
+            .isEqualTo(Instant.parse("2026-11-13T03:00:00Z"))
+        // 2 AM local on the 13th is still the 12th's game day: it ends two hours later, at 4.
+        assertThat(GameDay.endOf(Instant.parse("2026-11-13T01:00:00Z"), sarajevo, 4))
+            .isEqualTo(Instant.parse("2026-11-13T03:00:00Z"))
+    }
+
+    @Test
+    fun `a day that ends at a start hour the clocks skip ends an hour later`() {
+        // With the day starting at 2 AM, 28 March 2026 would end at 2:00 on the 29th, which doesn't
+        // exist: the clocks jump to 3:00 summer time, 01:00 UTC.
+        assertThat(GameDay.endOf(Instant.parse("2026-03-28T12:00:00Z"), sarajevo, 2))
+            .isEqualTo(Instant.parse("2026-03-29T01:00:00Z"))
+    }
+
+    @Test
     fun `a start hour outside 0 to 23 is refused`() {
         assertThrows(IllegalArgumentException::class.java) { day("2026-11-06T03:00:00Z", startHour = 24) }
         assertThrows(IllegalArgumentException::class.java) { day("2026-11-06T03:00:00Z", startHour = -1) }

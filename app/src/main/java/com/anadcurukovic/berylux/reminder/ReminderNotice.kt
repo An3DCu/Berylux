@@ -9,8 +9,8 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.anadcurukovic.berylux.MainActivity
 import com.anadcurukovic.berylux.R
+import com.anadcurukovic.berylux.core.navigation.AppLinks
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -38,7 +38,7 @@ class ReminderNotice @Inject constructor(
         val open = PendingIntent.getActivity(
             context,
             0,
-            MainActivity.openTodayIntent(context),
+            AppLinks.openToday(context),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val notice = NotificationCompat.Builder(context, CHANNEL)

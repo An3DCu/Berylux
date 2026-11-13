@@ -242,6 +242,20 @@ class CasesViewModelTest {
     }
 
     @Test
+    fun `Close from the widget asks about an open case, and nothing about a closed one`() = runTest {
+        val open = take(1)
+        val closed = take(2)
+        cases.close(closed, time.now(), today, luxEarned = 25)
+        keepCollecting()
+
+        viewModel.onCloseAsked(closed)
+        assertThat(content().pending).isNull()
+
+        viewModel.onCloseAsked(open)
+        assertThat(content().pending).isEqualTo(PendingAction.Close(content().today.first { it.id == open }))
+    }
+
+    @Test
     fun `the open dialog survives the process being killed`() = runTest {
         take(1)
         keepCollecting()

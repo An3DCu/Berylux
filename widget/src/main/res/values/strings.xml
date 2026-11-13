@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Names in the phone's widget picker. -->
+    <string name="widget_sign_name">The sign</string>
+    <string name="widget_case_name">Today\'s case</string>
+
+    <!-- The sign's line under it, and what TalkBack reads for the sign. -->
+    <string name="widget_sign_none">No streak yet</string>
+    <string name="widget_sign_day">Day %1$d</string>
+    <plurals name="widget_sign_description">
+        <item quantity="one">Streak: %d day</item>
+        <item quantity="other">Streak: %d days</item>
+    </plurals>
+
+    <!-- Today's case. -->
+    <string name="widget_case_label">Daily case</string>
+    <string name="widget_case_none">No case on file yet.</string>
+    <string name="widget_case_meta">%1$s · %2$s · %3$s</string>
+    <string name="widget_case_lux_pays" tools:ignore="PluralsCandidate">+%1$d Lux</string>
+    <string name="widget_case_lux_earned" tools:ignore="PluralsCandidate">+%1$d Lux earned</string>
+    <string name="widget_case_take">Take the case</string>
+    <string name="widget_case_close">Close</string>
+    <string name="widget_case_closed">Closed</string>
+</resources>

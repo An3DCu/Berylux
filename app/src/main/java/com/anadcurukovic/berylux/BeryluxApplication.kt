@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.anadcurukovic.berylux.reminder.ReminderNotice
 import com.anadcurukovic.berylux.reminder.ReminderSync
+import com.anadcurukovic.berylux.widget.WidgetSync
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 /**
  * Hilt builds the app-wide object graph from here: database, settings, repositories. WorkManager
- * starts from here too, with Hilt's factory, so the reminder's worker gets its repositories.
+ * starts from here too, with Hilt's factory, so the reminder's and the widgets' workers get their
+ * repositories. The home screen widgets are kept in step from here while the app runs.
  */
 @HiltAndroidApp
 class BeryluxApplication : Application(), Configuration.Provider {
@@ -23,6 +25,8 @@ class BeryluxApplication : Application(), Configuration.Provider {
     @Inject lateinit var reminderNotice: ReminderNotice
 
     @Inject lateinit var reminderSync: ReminderSync
+
+    @Inject lateinit var widgetSync: WidgetSync
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -33,5 +37,6 @@ class BeryluxApplication : Application(), Configuration.Provider {
         super.onCreate()
         reminderNotice.createChannel()
         scope.launch { reminderSync.run() }
+        scope.launch { widgetSync.run() }
     }
 }

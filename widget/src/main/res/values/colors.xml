@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The dark desk's colors from BeryluxColors, for the widgets' shapes. -->
+<resources>
+    <color name="widget_desk">#FF121014</color>
+    <color name="widget_paper">#FFE8DFC8</color>
+    <color name="widget_stamp">#FF9E1538</color>
+</resources>

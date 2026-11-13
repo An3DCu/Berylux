@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The desk behind both widgets. Android 12 and newer round the corners to the launcher's own. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/widget_desk" />
+    <corners android:radius="16dp" />
+</shape>

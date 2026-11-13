@@ -19,4 +19,11 @@ object GameDay {
         require(startHour in UserSettings.DAY_START_HOURS) { "startHour must be 0 to 23, was $startHour" }
         return instant.atZone(zone).toLocalDateTime().minusHours(startHour.toLong()).toLocalDate()
     }
+
+    /**
+     * When the game day in force at [instant] ends: the start hour on the next calendar day. On the
+     * night the clocks go forward, a start hour that doesn't exist moves on by the gap.
+     */
+    fun endOf(instant: Instant, zone: ZoneId, startHour: Int = DEFAULT_START_HOUR): Instant =
+        of(instant, zone, startHour).plusDays(1).atTime(startHour, 0).atZone(zone).toInstant()
 }

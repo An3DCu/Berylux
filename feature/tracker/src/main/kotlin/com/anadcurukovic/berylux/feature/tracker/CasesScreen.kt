@@ -53,9 +53,17 @@ import java.time.format.FormatStyle
 fun CasesScreen(
     onOpenToday: () -> Unit,
     modifier: Modifier = Modifier,
+    closeRequest: Long? = null,
+    onCloseRequestSeen: () -> Unit = {},
     viewModel: CasesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(closeRequest) {
+        closeRequest?.let {
+            viewModel.onCloseAsked(it)
+            onCloseRequestSeen()
+        }
+    }
     val snackbar = remember { SnackbarHostState() }
     // Leaving Cases ends the stamp and the narrator's line; turning the phone doesn't.
     val context = LocalContext.current

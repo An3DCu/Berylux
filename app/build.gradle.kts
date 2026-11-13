@@ -48,6 +48,7 @@ dependencies {
     implementation(projects.feature.profile)
     implementation(projects.feature.settings)
     implementation(projects.feature.rivals)
+    implementation(projects.widget)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

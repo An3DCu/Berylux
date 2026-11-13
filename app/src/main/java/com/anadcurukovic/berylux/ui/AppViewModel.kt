@@ -79,6 +79,15 @@ class AppViewModel @Inject constructor(
         todayRequests.trySend(Unit)
     }
 
+    private val closeRequests = Channel<Long>(Channel.CONFLATED)
+
+    /** Each time Close is tapped on the Today's case widget: Cases asks "Close it?" for that case. */
+    val closeCaseFlow: Flow<Long> = closeRequests.receiveAsFlow()
+
+    fun closeCase(caseId: Long) {
+        closeRequests.trySend(caseId)
+    }
+
     private val unlocks = Channel<Achievement>(Channel.UNLIMITED)
 
     /** Each achievement unlocked while the app runs, once, for a message. */

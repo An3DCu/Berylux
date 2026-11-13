@@ -56,3 +56,5 @@ include(":feature:progress")
 include(":feature:profile")
 include(":feature:settings")
 include(":feature:rivals")
+
+include(":widget")

@@ -7,6 +7,7 @@ ksp = "2.3.12"
 hilt = "2.60.1"
 androidxHilt = "1.4.0"
 androidxWork = "2.12.0"
+androidxGlance = "1.2.0"
 room = "2.8.5"
 detekt = "1.23.8"
 # detekt 1.23 is built with this Kotlin version and has to run on it
@@ -60,6 +61,8 @@ androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androi
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWork" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "androidxWork" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "androidxGlance" }
+androidx-glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "androidxGlance" }
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }

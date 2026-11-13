@@ -21,13 +21,15 @@ fun GemRank.label(): String = stringResource(
 )
 
 @Composable
-fun Difficulty.label(): String = stringResource(
-    when (this) {
-        Difficulty.EASY -> R.string.core_ui_difficulty_easy
-        Difficulty.MEDIUM -> R.string.core_ui_difficulty_medium
-        Difficulty.HARD -> R.string.core_ui_difficulty_hard
-    },
-)
+fun Difficulty.label(): String = stringResource(labelRes())
+
+/** The difficulty's name, as a plain resource the widgets can read outside Compose. */
+@StringRes
+fun Difficulty.labelRes(): Int = when (this) {
+    Difficulty.EASY -> R.string.core_ui_difficulty_easy
+    Difficulty.MEDIUM -> R.string.core_ui_difficulty_medium
+    Difficulty.HARD -> R.string.core_ui_difficulty_hard
+}
 
 private class AchievementLabel(@StringRes val title: Int, @StringRes val text: Int)
 

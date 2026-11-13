@@ -1,6 +1,5 @@
 package com.anadcurukovic.berylux
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -22,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anadcurukovic.berylux.core.designsystem.BeryluxTheme
 import com.anadcurukovic.berylux.core.designsystem.component.beryluxEffects
 import com.anadcurukovic.berylux.core.model.ThemeMode
+import com.anadcurukovic.berylux.core.navigation.AppLinks
 import com.anadcurukovic.berylux.ui.AppViewModel
 import com.anadcurukovic.berylux.ui.BeryluxApp
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,8 +35,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Opened from the morning docket: go to Today. Not again when the activity is recreated.
-        if (savedInstanceState == null && intent?.action == ACTION_OPEN_TODAY) appViewModel.openToday()
+        // Opened from the morning docket or a widget: go there. Not again when the activity is recreated.
+        if (savedInstanceState == null) intent?.let(::follow)
         enableEdgeToEdge(barStyle(daylight = false), barStyle(daylight = false))
         setContent {
             val theme by appViewModel.theme.collectAsStateWithLifecycle()
@@ -67,7 +67,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.action == ACTION_OPEN_TODAY) appViewModel.openToday()
+        follow(intent)
+    }
+
+    /** Today from the morning docket and the widgets; Cases with "Close it?" from Today's case. */
+    private fun follow(intent: Intent) {
+        when (intent.action) {
+            AppLinks.OPEN_TODAY -> appViewModel.openToday()
+            AppLinks.CLOSE_CASE -> AppLinks.caseToClose(intent)?.let(appViewModel::closeCase)
+        }
     }
 
     /** Light bars get dark icons and the other way round; the app draws behind both. */
@@ -77,15 +85,4 @@ class MainActivity : ComponentActivity() {
         } else {
             SystemBarStyle.dark(Color.TRANSPARENT)
         }
-
-    companion object {
-        private const val ACTION_OPEN_TODAY = "com.anadcurukovic.berylux.OPEN_TODAY"
-
-        /** Opens the app on Today, over a running one or as a fresh start. */
-        fun openTodayIntent(context: Context): Intent =
-            Intent(context, MainActivity::class.java)
-                .setAction(ACTION_OPEN_TODAY)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    }
 }
