@@ -9,8 +9,8 @@ android {
 
     defaultConfig {
         applicationId = "com.anadcurukovic.berylux"
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
 
         // Instrumented tests start a Hilt test app. The orchestrator clears the app's data before
         // each one, so every test begins on a fresh install.
