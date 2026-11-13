@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 
@@ -150,6 +151,12 @@ internal class OfflineSettingsRepository @Inject constructor(
     override suspend fun setEffectsLevel(level: Int) = source.setEffectsLevel(level)
 
     override suspend fun setMotion(motion: MotionMode) = source.setMotion(motion)
+
+    override suspend fun setReminderOn(on: Boolean) = source.setReminderOn(on)
+
+    override suspend fun setReminderTime(time: LocalTime) = source.setReminderTime(time)
+
+    override suspend fun answerReminderOffer(yes: Boolean) = source.answerReminderOffer(yes)
 
     override val achievementsSeenAt: Flow<Instant> = source.achievementsSeenAt
 

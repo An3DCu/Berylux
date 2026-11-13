@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 /*
@@ -204,6 +205,14 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
     override suspend fun setEffectsLevel(level: Int) = state.update { it.copy(effectsLevel = level) }
 
     override suspend fun setMotion(motion: MotionMode) = state.update { it.copy(motion = motion) }
+
+    override suspend fun setReminderOn(on: Boolean) = state.update { it.copy(reminderOn = on) }
+
+    override suspend fun setReminderTime(time: LocalTime) =
+        state.update { it.copy(reminderTime = time.withSecond(0).withNano(0)) }
+
+    override suspend fun answerReminderOffer(yes: Boolean) =
+        state.update { it.copy(reminderAsked = true, reminderOn = it.reminderOn || yes) }
 
     private val seenAt = MutableStateFlow(Instant.EPOCH)
     override val achievementsSeenAt: Flow<Instant> = seenAt

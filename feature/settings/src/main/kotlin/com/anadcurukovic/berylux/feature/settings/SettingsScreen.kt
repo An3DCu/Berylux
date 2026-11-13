@@ -58,12 +58,17 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
             onTheme = viewModel::onTheme,
             onEffectsLevel = viewModel::onEffectsLevel,
             onMotion = viewModel::onMotion,
+            onReminderOn = viewModel::onReminderOn,
+            onReminderTime = viewModel::onReminderTime,
             contentPadding = padding,
         )
     }
 }
 
-/** Settings, stateless: four cards, the start hour, the theme, the grain and scanlines, and motion. */
+/**
+ * Settings, stateless: five cards, the start hour, the morning docket, the theme, the grain and
+ * scanlines, and motion.
+ */
 @Composable
 fun SettingsContent(
     state: SettingsUiState,
@@ -73,6 +78,8 @@ fun SettingsContent(
     onEffectsLevel: (Int) -> Unit,
     onMotion: (MotionMode) -> Unit,
     modifier: Modifier = Modifier,
+    onReminderOn: (Boolean) -> Unit = {},
+    onReminderTime: (LocalTime) -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     when (state) {
@@ -96,6 +103,7 @@ fun SettingsContent(
                 modifier = Modifier.semantics { heading() },
             )
             HourCard(state, onEarlier, onLater)
+            MorningDocketCard(state.reminderOn, state.reminderTime, onReminderOn, onReminderTime)
             ThemeCard(state.theme, onTheme)
             EffectsCard(state.effectsLevel, onEffectsLevel)
             MotionCard(state.motion, onMotion)
@@ -235,6 +243,8 @@ private fun SettingsPreview() {
                 theme = ThemeMode.DARK,
                 effectsLevel = 3,
                 motion = MotionMode.FOLLOW_PHONE,
+                reminderOn = true,
+                reminderTime = LocalTime.of(9, 0),
             ),
             onEarlier = {},
             onLater = {},

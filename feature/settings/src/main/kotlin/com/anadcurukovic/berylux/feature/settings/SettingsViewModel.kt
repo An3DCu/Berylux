@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import javax.inject.Inject
 
 sealed interface SettingsUiState {
@@ -30,6 +31,8 @@ sealed interface SettingsUiState {
         val theme: ThemeMode,
         val effectsLevel: Int,
         val motion: MotionMode,
+        val reminderOn: Boolean,
+        val reminderTime: LocalTime,
     ) : SettingsUiState {
         /** The hour the − and + buttons move from: the waiting one, if there is one. */
         val shownHour: Int get() = pendingHour ?: hour
@@ -38,7 +41,7 @@ sealed interface SettingsUiState {
     data object Error : SettingsUiState
 }
 
-/** The start hour, the theme, the grain and scanlines, and motion. Every change is kept at once. */
+/** The start hour, the morning docket, the theme, the grain and scanlines, and motion. Every change is kept at once. */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository,
@@ -69,6 +72,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settings.setMotion(motion) }
     }
 
+    fun onReminderOn(on: Boolean) {
+        viewModelScope.launch { settings.setReminderOn(on) }
+    }
+
+    fun onReminderTime(time: LocalTime) {
+        viewModelScope.launch { settings.setReminderTime(time) }
+    }
+
     private fun moveHour(by: Int) {
         val content = uiState.value as? SettingsUiState.Content ?: return
         val hours = UserSettings.DAY_START_HOURS.count()
@@ -83,6 +94,8 @@ class SettingsViewModel @Inject constructor(
             theme = userSettings.theme,
             effectsLevel = userSettings.effectsLevel,
             motion = userSettings.motion,
+            reminderOn = userSettings.reminderOn,
+            reminderTime = userSettings.reminderTime,
         )
     }
 

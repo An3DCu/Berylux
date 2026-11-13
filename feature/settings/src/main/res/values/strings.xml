@@ -27,5 +27,13 @@
     <string name="settings_motion_reduced">Reduced</string>
     <string name="settings_motion_note">Reduced keeps the stamp, the sign and the gem still.</string>
 
+    <string name="settings_reminder_title">Morning docket</string>
+    <string name="settings_reminder_off">Off</string>
+    <string name="settings_reminder_on">On</string>
+    <string name="settings_reminder_at">At %1$s</string>
+    <string name="settings_reminder_note">Tap the time to change it.</string>
+    <string name="settings_reminder_denied">Android has notifications off for Berylux.</string>
+    <string name="settings_reminder_open">Open Android settings</string>
+
     <string name="settings_error">Settings wouldn\'t open. Restart the app to try again.</string>
 </resources>

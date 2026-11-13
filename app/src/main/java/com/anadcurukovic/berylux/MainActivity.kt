@@ -1,5 +1,7 @@
 package com.anadcurukovic.berylux
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
@@ -33,6 +35,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Opened from the morning docket: go to Today. Not again when the activity is recreated.
+        if (savedInstanceState == null && intent?.action == ACTION_OPEN_TODAY) appViewModel.openToday()
         enableEdgeToEdge(barStyle(daylight = false), barStyle(daylight = false))
         setContent {
             val theme by appViewModel.theme.collectAsStateWithLifecycle()
@@ -61,6 +65,11 @@ class MainActivity : ComponentActivity() {
             Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == ACTION_OPEN_TODAY) appViewModel.openToday()
+    }
+
     /** Light bars get dark icons and the other way round; the app draws behind both. */
     private fun barStyle(daylight: Boolean): SystemBarStyle =
         if (daylight) {
@@ -68,4 +77,15 @@ class MainActivity : ComponentActivity() {
         } else {
             SystemBarStyle.dark(Color.TRANSPARENT)
         }
+
+    companion object {
+        private const val ACTION_OPEN_TODAY = "com.anadcurukovic.berylux.OPEN_TODAY"
+
+        /** Opens the app on Today, over a running one or as a fresh start. */
+        fun openTodayIntent(context: Context): Intent =
+            Intent(context, MainActivity::class.java)
+                .setAction(ACTION_OPEN_TODAY)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    }
 }

@@ -11,13 +11,12 @@ import com.anadcurukovic.berylux.core.domain.GameClock
 import com.anadcurukovic.berylux.core.domain.LuxRules
 import com.anadcurukovic.berylux.core.domain.Narration
 import com.anadcurukovic.berylux.core.domain.NarratorRules
-import com.anadcurukovic.berylux.core.domain.repository.CaseRepository
+import com.anadcurukovic.berylux.core.domain.PlayerCaseFiles
 import com.anadcurukovic.berylux.core.domain.repository.ChallengeRepository
-import com.anadcurukovic.berylux.core.domain.repository.ProfileRepository
+import com.anadcurukovic.berylux.core.domain.repository.SettingsRepository
 import com.anadcurukovic.berylux.core.model.CaseFile
 import com.anadcurukovic.berylux.core.model.CaseStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,14 +24,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 /**
@@ -94,6 +90,8 @@ sealed interface CasesUiState {
         val history: List<DayUi>,
         val pending: PendingAction?,
         val justClosed: JustClosed? = null,
+        /** The morning docket's time, offered under the narrator's line until the player answers. */
+        val reminderOffer: LocalTime? = null,
     ) : CasesUiState {
         val limit: Int get() = DailyCap.LIMIT
     }
@@ -110,14 +108,13 @@ sealed interface CasesMessage {
     data object Failed : CasesMessage
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CasesViewModel @Inject constructor(
-    profiles: ProfileRepository,
+    playerCaseFiles: PlayerCaseFiles,
     challenges: ChallengeRepository,
-    cases: CaseRepository,
     clock: GameClock,
     private val actions: CaseActions,
+    private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
 ) : ViewModel() {
     private val pendingId = savedState.getStateFlow<Long?>(PENDING_ID, null)
@@ -130,13 +127,15 @@ class CasesViewModel @Inject constructor(
     /** One-off messages for a snackbar; each is shown once. */
     val messageFlow: Flow<CasesMessage> = messages.receiveAsFlow()
 
-    private val allCases: Flow<List<CaseFile>> = profiles.profile
-        .filterNotNull()
-        .map { it.id }
-        .distinctUntilChanged()
-        .flatMapLatest { cases.caseFiles(it) }
+    private val allCases: Flow<List<CaseFile>> = playerCaseFiles()
 
     private val pending: Flow<Pair<Long?, String?>> = combine(pendingId, pendingKind) { id, kind -> id to kind }
+
+    /** The narrator's line, with the reminder offer under it while it's unanswered. */
+    private val afterClose: Flow<Pair<JustClosed?, LocalTime?>> =
+        combine(justClosed, settings.settings) { just, userSettings ->
+            just to userSettings.reminderTime.takeIf { just != null && !userSettings.reminderAsked }
+        }
 
     val uiState: StateFlow<CasesUiState> =
         combine(
@@ -144,9 +143,10 @@ class CasesViewModel @Inject constructor(
             clock.days(),
             challenges.categories,
             pending,
-            justClosed
-        ) { files, today, categories, (id, kind), just ->
-            content(files, today, categories.associate { it.id to it.name }, id, kind).copy(justClosed = just)
+            afterClose,
+        ) { files, today, categories, (id, kind), (just, offer) ->
+            content(files, today, categories.associate { it.id to it.name }, id, kind)
+                .copy(justClosed = just, reminderOffer = offer)
         }
             .catch<CasesUiState> { emit(CasesUiState.Error) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), CasesUiState.Loading)
@@ -158,6 +158,11 @@ class CasesViewModel @Inject constructor(
     /** The player left Cases: the stamp and the narrator's line are done. */
     fun onLeave() {
         justClosed.value = null
+    }
+
+    /** YES turns the morning docket on; either answer ends the offer for good. */
+    fun onReminderAnswer(yes: Boolean) {
+        viewModelScope.launch { settings.answerReminderOffer(yes) }
     }
 
     fun onDismiss() {

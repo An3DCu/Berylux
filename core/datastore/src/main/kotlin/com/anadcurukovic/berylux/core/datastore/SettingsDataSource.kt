@@ -2,6 +2,7 @@ package com.anadcurukovic.berylux.core.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -12,6 +13,7 @@ import com.anadcurukovic.berylux.core.model.UserSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
+import java.time.LocalTime
 import javax.inject.Inject
 
 /**
@@ -37,6 +39,12 @@ class SettingsDataSource @Inject constructor(
             motion = prefs[MOTION]
                 ?.let { name -> MotionMode.entries.firstOrNull { it.name == name } }
                 ?: MotionMode.FOLLOW_PHONE,
+            reminderOn = prefs[REMINDER_ON] ?: false,
+            reminderTime = prefs[REMINDER_MINUTE]
+                ?.takeIf { it in MINUTES_IN_DAY }
+                ?.let { LocalTime.ofSecondOfDay(it * SECONDS_IN_MINUTE) }
+                ?: UserSettings.DEFAULT_REMINDER_TIME,
+            reminderAsked = prefs[REMINDER_ASKED] ?: false,
         )
     }
 
@@ -86,6 +94,23 @@ class SettingsDataSource @Inject constructor(
         dataStore.edit { it[MOTION] = motion.name }
     }
 
+    suspend fun setReminderOn(on: Boolean) {
+        dataStore.edit { it[REMINDER_ON] = on }
+    }
+
+    /** Kept as the minute of the day; seconds are dropped. */
+    suspend fun setReminderTime(time: LocalTime) {
+        dataStore.edit { it[REMINDER_MINUTE] = time.toSecondOfDay() / SECONDS_IN_MINUTE.toInt() }
+    }
+
+    /** Written together, so the offer can't come back after a yes. */
+    suspend fun answerReminderOffer(yes: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[REMINDER_ASKED] = true
+            if (yes) prefs[REMINDER_ON] = true
+        }
+    }
+
     private companion object {
         val DAY_START_HOUR = intPreferencesKey("day_start_hour")
         val THEME = stringPreferencesKey("theme")
@@ -94,5 +119,10 @@ class SettingsDataSource @Inject constructor(
         val NEXT_DAY_START_HOUR = intPreferencesKey("next_day_start_hour")
         val NEXT_HOUR_FROM = longPreferencesKey("next_hour_from")
         val MOTION = stringPreferencesKey("motion")
+        val REMINDER_ON = booleanPreferencesKey("reminder_on")
+        val REMINDER_MINUTE = intPreferencesKey("reminder_minute")
+        val REMINDER_ASKED = booleanPreferencesKey("reminder_asked")
+        val MINUTES_IN_DAY = 0 until 24 * 60
+        const val SECONDS_IN_MINUTE = 60L
     }
 }

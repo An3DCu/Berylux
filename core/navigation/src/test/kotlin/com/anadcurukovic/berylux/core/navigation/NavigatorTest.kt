@@ -98,4 +98,19 @@ class NavigatorTest {
             backStacks = tabs.associateWith { NavBackStack<NavKey>(it) },
         )
     }
+
+    @Test
+    fun `opening a tab at its root clears what was stacked on it`() {
+        val nav = navigator()
+        nav.navigate(ProfileRoute)
+        nav.navigate(SettingsRoute)
+        nav.navigate(CatalogRoute)
+        nav.navigate(CategoryRoute(3))
+
+        nav.openAtRoot(TodayRoute)
+        assertThat(nav.state.currentKey).isEqualTo(TodayRoute)
+        assertThat(nav.stack(TodayRoute)).containsExactly(TodayRoute)
+        // The other tabs keep their place.
+        assertThat(nav.stack(CatalogRoute)).containsExactly(CatalogRoute, CategoryRoute(3)).inOrder()
+    }
 }

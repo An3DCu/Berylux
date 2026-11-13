@@ -23,6 +23,13 @@ class Navigator(
         }
     }
 
+    /** Opens the tab [route] at its first screen, whatever was stacked on it. For the morning docket. */
+    fun openAtRoot(route: NavKey) {
+        require(route in state.backStacks.keys) { "$route isn't a tab" }
+        resetToRoot(route)
+        state.topLevelRoute = route
+    }
+
     /**
      * Back pops the current tab. At a tab's root it goes to the start tab. At the start tab's
      * root it returns false, and the system closes the app.
