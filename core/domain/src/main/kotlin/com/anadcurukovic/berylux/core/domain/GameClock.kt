@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -22,6 +23,12 @@ class GameClock @Inject constructor(
     suspend fun today(): LocalDate {
         val now = time.now()
         return GameDay.of(now, time.zone(), settings.settings.first().startHourAt(now))
+    }
+
+    /** When today ends, at the hour in force now; a new hour the player picked starts after it. */
+    suspend fun endOfToday(): Instant {
+        val now = time.now()
+        return GameDay.endOf(now, time.zone(), settings.settings.first().startHourAt(now))
     }
 
     /**

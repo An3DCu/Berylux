@@ -19,7 +19,10 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
@@ -32,6 +35,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.anadcurukovic.berylux.R
 import com.anadcurukovic.berylux.core.designsystem.Berylux
 import com.anadcurukovic.berylux.core.designsystem.BeryluxType
+import com.anadcurukovic.berylux.core.navigation.CasesRoute
 import com.anadcurukovic.berylux.core.navigation.CategoryRoute
 import com.anadcurukovic.berylux.core.navigation.EditorRoute
 import com.anadcurukovic.berylux.core.navigation.Navigator
@@ -86,10 +90,22 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
     LaunchedEffect(appViewModel, navigator) {
         appViewModel.openTodayFlow.collect { navigator.openAtRoot(TodayRoute) }
     }
+    // A case to ask "Close it?" for, from the widget, until Cases has asked.
+    var closeRequest by rememberSaveable { mutableStateOf<Long?>(null) }
+    LaunchedEffect(appViewModel, navigator) {
+        appViewModel.closeCaseFlow.collect { caseId ->
+            closeRequest = caseId
+            navigator.openAtRoot(CasesRoute)
+        }
+    }
 
     val entryProvider = entryProvider {
         todayEntries(onOpenProfile = { navigator.navigate(ProfileRoute) })
-        casesEntries(onOpenToday = { navigator.navigate(TodayRoute) })
+        casesEntries(
+            onOpenToday = { navigator.navigate(TodayRoute) },
+            closeRequest = { closeRequest },
+            onCloseRequestSeen = { closeRequest = null },
+        )
         catalogEntries(
             onOpenCategory = { navigator.navigate(CategoryRoute(it)) },
             onNewChallenge = { navigator.navigate(EditorRoute()) },

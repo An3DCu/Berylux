@@ -94,15 +94,15 @@ private fun Stamp() {
     )
 }
 
-private const val Word = "BERYLUX"
+internal const val Word = "BERYLUX"
 private const val LETTER_SIZE = 32
-private const val STAMP_TILT = -5f
+internal const val STAMP_TILT = -5f
 private const val FLICKER_MS = 400
 
 /** The sign gets deeper each week. Week 4 is 2.6:1 on the desk, Anad's call; the count beside it reads in full. */
-private val WeekReds = listOf(Color(0xFFFF6E8C), Color(0xFFE43A64), Color(0xFFC8284F), Color(0xFFA8183F))
-private val UnlitColor = Color(0xFF3C3038)
-private val StampRed = Color(0xFFE43A64)
+internal val WeekReds = listOf(Color(0xFFFF6E8C), Color(0xFFE43A64), Color(0xFFC8284F), Color(0xFFA8183F))
+internal val UnlitColor = Color(0xFF3C3038)
+internal val StampRed = Color(0xFFE43A64)
 private val PlateColor = Color(0xFF121014)
 
 /** Three quick flickers over 400 ms: (time in ms, brightness). */
