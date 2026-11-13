@@ -51,7 +51,7 @@ object AchievementRules {
         val bonusIds = categories.filter { it.kind == CategoryKind.BONUS }.map { it.id }.toSet()
         val builtInIds = categories.filter { it.kind != CategoryKind.CUSTOM }.map { it.id }.toSet()
         val closedCategoryIds = closed.map { it.challenge.categoryId }.toSet()
-        // Your own challenges have no difficulty, so only built-in Hard ones count.
+        // Your own challenges have no difficulty. Only built-in Hard ones count.
         val hard = closed.count { !it.challenge.isCustom && it.challenge.difficulty == Difficulty.HARD }
         val fullDay = closed.groupingBy { it.case.closedOn }.eachCount().values.any { it >= DailyCap.LIMIT }
         return buildSet {
@@ -106,7 +106,7 @@ class UnlockAchievementsUseCase @Inject constructor(
                 val streak = Streaks.calculate(closedDays, today)
                 AchievementRules.earned(files, categories, player.lux, streak)
             }.map { earned ->
-                // unlock() is false for one already stored, so each comes through once.
+                // unlock() is false for one already stored. Each comes through once.
                 earned.filter { achievements.unlock(profileId, it.key, time.now()) }
             }
         }.filter { it.isNotEmpty() }

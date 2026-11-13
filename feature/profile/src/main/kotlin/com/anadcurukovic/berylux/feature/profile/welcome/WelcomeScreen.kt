@@ -52,7 +52,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier, viewModel: WelcomeViewModel = h
     )
 }
 
-/** Stateless, so it can be previewed and tested with any state. */
+/** Stateless. It can be previewed and tested with any state. */
 @Composable
 fun WelcomeContent(
     state: WelcomeUiState,

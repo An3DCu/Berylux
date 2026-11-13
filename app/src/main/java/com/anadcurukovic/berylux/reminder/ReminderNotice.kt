@@ -20,7 +20,7 @@ class ReminderNotice @Inject constructor(
 ) {
     private val manager = NotificationManagerCompat.from(context)
 
-    /** Made at start, so Android's notification settings list it before the first notice. */
+    /** Made at start. Android's notification settings list it before the first notice. */
     fun createChannel() {
         manager.createNotificationChannel(
             NotificationChannelCompat.Builder(CHANNEL, NotificationManagerCompat.IMPORTANCE_DEFAULT)

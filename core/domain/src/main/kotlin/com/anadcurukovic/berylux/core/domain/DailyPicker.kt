@@ -16,13 +16,13 @@ data class DailyPick(
  * Picks the day's cases: one daily case and the picks from regular categories, one bonus case
  * from bonus categories. Custom challenges are never picked.
  *
- * The pick depends only on the profile's seed, the day and the category filter, so it stays the
+ * The pick depends only on the profile's seed, the day and the category filter. It stays the
  * same all day and changes the next day. The order the challenges come in doesn't matter.
  */
 object DailyPicker {
     const val PICK_COUNT = 4
 
-    // Different salts, so the bonus shuffle isn't tied to the regular one.
+    // Different salts. The bonus shuffle isn't tied to the regular one.
     private const val REGULAR_SALT = 0x52454755L
     private const val BONUS_SALT = 0x424F4E55L
 

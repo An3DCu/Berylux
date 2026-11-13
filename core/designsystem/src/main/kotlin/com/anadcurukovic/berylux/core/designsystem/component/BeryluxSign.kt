@@ -29,8 +29,8 @@ import com.anadcurukovic.berylux.core.designsystem.Spacing
 /**
  * The BERYLUX sign: one letter per streak day, a deeper red each week for four weeks, then a
  * stamp from day 29 until the streak ends. A newly lit letter flickers on. On the daylight
- * theme it hangs on a dark plate, so the neon reads the same. With reduced motion a letter lights
- * without the flicker. TalkBack reads [contentDescription].
+ * theme it hangs on a dark plate. The neon reads the same there. With reduced motion a letter
+ * lights without the flicker. TalkBack reads [contentDescription].
  */
 @Composable
 fun BeryluxSign(streakDays: Int, contentDescription: String, modifier: Modifier = Modifier, flicker: Boolean = true) {

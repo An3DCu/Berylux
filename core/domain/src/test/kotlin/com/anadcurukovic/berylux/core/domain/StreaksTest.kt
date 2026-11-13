@@ -48,7 +48,7 @@ class StreaksTest {
     @Test
     fun `six days in a row earn nothing yet`() {
         val state = Streaks.calculate(novRange(1, 6) + nov(8), today = nov(8))
-        // 7 November is missed with no freeze, so 8 November starts over.
+        // 7 November is missed with no freeze. 8 November starts over.
         assertThat(state.current).isEqualTo(1)
         assertThat(state.longest).isEqualTo(6)
         assertThat(state.freezesBanked).isEqualTo(0)

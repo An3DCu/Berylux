@@ -93,7 +93,7 @@ class EditorViewModel @AssistedInject constructor(
     private val events = Channel<EditorEvent>(Channel.BUFFERED)
 
     /**
-     * The text in the fields, as Compose state: a keystroke shows in the same frame, so fast typing
+     * The text in the fields, as Compose state: a keystroke shows in the same frame. Fast typing
      * can't lose or reorder letters the way a round trip through a flow can. [savedState] keeps a
      * copy for process death, and the counters and problems in [uiState] follow from that copy.
      */

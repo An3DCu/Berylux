@@ -6,7 +6,7 @@ import android.net.Uri
 
 /**
  * Intents that open the app at a place, from outside it: the morning docket and the home screen
- * widgets. They name the app's launcher activity, never its class, so a widget module needs no
+ * widgets. They name the app's launcher activity, never its class. A widget module needs no
  * dependency on the app.
  */
 object AppLinks {

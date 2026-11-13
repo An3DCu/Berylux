@@ -9,7 +9,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
-/** Swaps Dispatchers.Main for a test dispatcher, so ViewModels can run in plain unit tests. */
+/** Swaps Dispatchers.Main for a test dispatcher. ViewModels can then run in plain unit tests. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
     val dispatcher: TestDispatcher = UnconfinedTestDispatcher(),

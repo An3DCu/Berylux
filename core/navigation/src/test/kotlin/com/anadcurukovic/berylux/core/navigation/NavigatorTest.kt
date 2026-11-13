@@ -38,7 +38,7 @@ class NavigatorTest {
     }
 
     @Test
-    fun `Today stays underneath any other tab, so the app is left through Today`() {
+    fun `Today stays underneath any other tab and the app is left through Today`() {
         val nav = navigator()
         nav.navigate(ProgressRoute)
         assertThat(nav.state.stacksInUse).containsExactly(TodayRoute, ProgressRoute).inOrder()

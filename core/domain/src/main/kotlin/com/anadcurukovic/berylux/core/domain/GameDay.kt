@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * A game day starts at a chosen hour on the phone's clock, 4 AM by default, so a case closed at
+ * A game day starts at a chosen hour on the phone's clock, 4 AM by default. A case closed at
  * 1 AM still counts for the evening before.
  *
  * The hour is read on the local clock, not as a fixed offset from UTC. On the nights the clocks

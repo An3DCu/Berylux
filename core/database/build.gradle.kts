@@ -7,7 +7,7 @@ plugins {
 
 android {
     sourceSets {
-        // The exported schemas, so tests can open every past version of the database.
+        // The exported schemas. Tests open every past version of the database from them.
         getByName("test").assets.directories.add("$projectDir/schemas")
     }
 }

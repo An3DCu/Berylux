@@ -91,7 +91,7 @@ class ProgressViewModelTest {
     @Test
     fun `an achievement earned after midnight but before the start hour shows the day before, like the stamp`() =
         runTest {
-            // 23:37 UTC on 6 November is 00:37 on the 7th in Sarajevo; the day starts at 4, so it's still the 6th.
+            // 23:37 UTC on 6 November is 00:37 on the 7th in Sarajevo. The day starts at 4: it's still the 6th.
             achievements.unlock(1, Achievement.FIRST_CLOSED.key, Instant.parse("2026-11-06T23:37:00Z"))
             // 14:00 UTC on the 6th is 15:00 that day.
             achievements.unlock(1, Achievement.CLOSED_10.key, Instant.parse("2026-11-06T14:00:00Z"))

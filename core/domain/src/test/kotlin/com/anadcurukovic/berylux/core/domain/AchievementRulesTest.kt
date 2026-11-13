@@ -66,7 +66,7 @@ class AchievementRulesTest {
 
     @Test
     fun `closed counts unlock at 1, 10, 50 and 100`() {
-        // Spread over days, so a full day doesn't come along.
+        // Spread over days. A full day doesn't come along.
         fun closed(n: Int) = (0 until n).map { case(on = today.minusDays(it.toLong())) }
         assertThat(earned(closed(1))).containsExactly(Achievement.FIRST_CLOSED)
         assertThat(earned(closed(9))).doesNotContain(Achievement.CLOSED_10)
@@ -151,7 +151,7 @@ class UnlockAchievementsUseCaseTest {
     private val time = FakeTimeSource(Instant.parse("2026-11-06T14:00:00Z"))
     private val today = LocalDate.of(2026, 11, 6)
     private val challenges = FakeChallengeRepository(
-        // Two categories, so one closed case doesn't also cover every category.
+        // Two categories. One closed case doesn't also cover every category.
         categories = listOf(
             Category(1, "Body", "", CategoryKind.REGULAR),
             Category(2, "Mind", "", CategoryKind.REGULAR),

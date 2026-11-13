@@ -40,8 +40,8 @@ internal val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 
 /**
- * Version 2 to 3: the sigil gets its own seed, so redrawing it leaves the daily picks and the rival
- * bots alone. Each profile's sigil seed starts as its pick seed, so every sigil looks the same.
+ * Version 2 to 3: the sigil gets its own seed. Redrawing it leaves the daily picks and the rival
+ * bots alone. Each profile's sigil seed starts as its pick seed. Every sigil stays as it was.
  */
 internal val MIGRATION_2_3 = object : Migration(2, 3) {
     private val statements = listOf(

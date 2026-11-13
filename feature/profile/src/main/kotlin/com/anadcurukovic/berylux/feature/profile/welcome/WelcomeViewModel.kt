@@ -19,7 +19,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 /**
- * @property problem shown only after the player tried to start, so an empty field isn't an error
+ * @property problem shown only after the player tried to start. An empty field isn't an error
  * the moment the screen opens.
  */
 data class WelcomeUiState(
@@ -45,7 +45,7 @@ class WelcomeViewModel @Inject constructor(
     val state: StateFlow<WelcomeUiState> = _state.asStateFlow()
 
     /**
-     * The name in the field, as Compose state: a keystroke shows in the same frame, so fast typing
+     * The name in the field, as Compose state: a keystroke shows in the same frame. Fast typing
      * can't lose or reorder letters the way a round trip through a flow can.
      */
     var name: String by mutableStateOf(_state.value.name)

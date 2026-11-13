@@ -50,7 +50,7 @@ object Streaks {
                     longest = maxOf(longest, current)
                     if (current % FREEZE_EVERY == 0) banked = minOf(banked + 1, MAX_FREEZES)
                 }
-                // Today isn't over yet, so not having closed a case today breaks nothing.
+                // Today isn't over yet. Not having closed a case today breaks nothing.
                 day == today -> Unit
                 current > 0 && banked > 0 -> {
                     banked--

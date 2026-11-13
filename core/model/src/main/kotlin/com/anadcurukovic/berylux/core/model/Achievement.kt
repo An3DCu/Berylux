@@ -1,7 +1,7 @@
 package com.anadcurukovic.berylux.core.model
 
 /**
- * The 17 achievements, in the order Progress lists them. [key] is what the database stores, so it
+ * The 17 achievements, in the order Progress lists them. [key] is what the database stores. It
  * never changes, even if a name on screen does.
  */
 enum class Achievement(val key: String) {

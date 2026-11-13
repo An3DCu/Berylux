@@ -8,8 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 /**
- * The clock on its own, so a test can swap just the clock with `@TestInstallIn` and keep every
- * repository as it is.
+ * The clock in a module of its own. A test can swap just the clock with `@TestInstallIn` and keep
+ * every repository as it is.
  */
 @Module
 @InstallIn(SingletonComponent::class)

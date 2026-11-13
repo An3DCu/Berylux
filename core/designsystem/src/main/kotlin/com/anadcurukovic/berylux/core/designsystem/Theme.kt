@@ -14,7 +14,7 @@ private val LocalReducedMotion = staticCompositionLocalOf { false }
 
 /**
  * Berylux's theme. [daylight] picks the case paper colors over the dark desk. The Material
- * roles are filled from the same colors, so the Material pieces the screens still use match.
+ * roles are filled from the same colors. The Material pieces the screens still use match them.
  */
 @Composable
 fun BeryluxTheme(daylight: Boolean = false, reducedMotion: Boolean = false, content: @Composable () -> Unit) {

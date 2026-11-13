@@ -58,7 +58,7 @@ fun Project.configureUnitTests() {
             "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
             "--add-opens=java.base/java.io=ALL-UNNAMED",
         )
-        // A failing test prints its message and stack trace, so CI's log says why, not just where.
+        // A failing test prints its message and stack trace. CI's log says why, not just where.
         testLogging {
             events("failed")
             exceptionFormat = TestExceptionFormat.FULL

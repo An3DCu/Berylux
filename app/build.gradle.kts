@@ -13,7 +13,7 @@ android {
         versionName = "0.4.0"
 
         // Instrumented tests start a Hilt test app. The orchestrator clears the app's data before
-        // each one, so every test begins on a fresh install.
+        // each one. Every test begins on a fresh install.
         testInstrumentationRunner = "com.anadcurukovic.berylux.HiltTestRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }
