@@ -47,7 +47,7 @@ import com.anadcurukovic.berylux.core.ui.label
 import com.anadcurukovic.berylux.core.ui.textRes
 import com.anadcurukovic.berylux.core.ui.titleRes
 import java.time.Instant
-import java.time.ZoneId
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 /** Progress, stateful. Each time it comes into view, it marks what's new since the last look. */
@@ -217,8 +217,8 @@ private fun AchievementCard(item: AchievementUi) {
         }
         Text(stringResource(item.achievement.textRes()), style = BeryluxType.Text)
         Text(
-            text = item.unlockedAt?.let {
-                stringResource(R.string.progress_unlocked_on, formatter.format(it.atZone(ZoneId.systemDefault())))
+            text = item.earnedOn?.let {
+                stringResource(R.string.progress_unlocked_on, formatter.format(it))
             }?.hud() ?: stringResource(R.string.progress_locked).hud(),
             style = BeryluxType.Label,
             color = if (earned) colors.stamp else colors.inkFaded,
@@ -244,7 +244,12 @@ private fun ProgressPreview() {
                     doneToday = true,
                 ),
                 achievements = Achievement.entries.mapIndexed { index, achievement ->
-                    AchievementUi(achievement, if (index < 2) Instant.EPOCH else null, isNew = index == 1)
+                    AchievementUi(
+                        achievement = achievement,
+                        unlockedAt = if (index < 2) Instant.EPOCH else null,
+                        isNew = index == 1,
+                        earnedOn = if (index < 2) LocalDate.of(2026, 11, 12) else null,
+                    )
                 },
             ),
             onOpenRivals = {},

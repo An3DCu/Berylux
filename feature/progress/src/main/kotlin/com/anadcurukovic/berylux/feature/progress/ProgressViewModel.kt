@@ -3,6 +3,7 @@ package com.anadcurukovic.berylux.feature.progress
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anadcurukovic.berylux.core.domain.GameClock
+import com.anadcurukovic.berylux.core.domain.GameDay
 import com.anadcurukovic.berylux.core.domain.RankProgress
 import com.anadcurukovic.berylux.core.domain.RankRules
 import com.anadcurukovic.berylux.core.domain.StreakState
@@ -26,13 +27,18 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import javax.inject.Inject
 
-/** One achievement in the list. [unlockedAt] is null while it's locked. */
+/**
+ * One achievement in the list. [unlockedAt] is null while it's locked. [earnedOn] is the game day it
+ * was earned on, the day a CLOSED stamp shows: before the start hour, that's the day before.
+ */
 data class AchievementUi(
     val achievement: Achievement,
     val unlockedAt: Instant?,
     val isNew: Boolean,
+    val earnedOn: LocalDate? = null,
 )
 
 sealed interface ProgressUiState {
@@ -71,14 +77,20 @@ class ProgressViewModel @Inject constructor(
                 clock.days(),
                 achievements.unlocked(profile.id),
                 newSince,
-            ) { closedDays, today, unlocked, since ->
+                settings.settings,
+            ) { closedDays, today, unlocked, since, userSettings ->
                 ProgressUiState.Content(
                     lux = profile.lux,
                     rank = RankRules.progress(profile.lux),
                     streak = Streaks.calculate(closedDays, today),
                     achievements = Achievement.entries.map { achievement ->
                         val at = unlocked[achievement.key]
-                        AchievementUi(achievement, at, isNew = at != null && since != null && at.isAfter(since))
+                        AchievementUi(
+                            achievement = achievement,
+                            unlockedAt = at,
+                            isNew = at != null && since != null && at.isAfter(since),
+                            earnedOn = at?.let { GameDay.of(it, time.zone(), userSettings.startHourAt(it)) },
+                        )
                     },
                 )
             }
