@@ -289,6 +289,42 @@ class BeryluxAppTest {
         assertThat(luxLefts.any { abs(it - habit.left) < 1f }).isTrue()
     }
 
+    /** Progress is a lazy list: the file room's button may be below the screen. */
+    private fun openFileRoom() {
+        tap("Progress")
+        assertOn("Your record")
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("The file room"))
+        tap("The file room")
+        assertOn("The file room")
+    }
+
+    @Test
+    fun theFileRoomOpensFromProgressAndReadsEachChartInOneLine() {
+        startAs("Sam")
+        openFileRoom()
+        waitForText("Nothing closed yet. The record starts with the first case.")
+        pressBack()
+
+        tap("Today")
+        takeFirstCase(taken = 1)
+        tap("Cases")
+        closeFirstOpenCase()
+        openFileRoom()
+        // Sunday 8 November: the calendar runs from Monday 5 October, 27 days of October and 8 of November.
+        compose.waitUntilAtLeastOneExists(
+            hasContentDescription("Streak calendar: 1 of the last 35 days closed."),
+            timeoutMillis = 5_000,
+        )
+        // One case closed this week: this week, the twelve weeks and the best week are its Lux.
+        val lux = compose.onNode(hasContentDescription("Lux by week:", substring = true)).fetchSemanticsNode()
+            .config[SemanticsProperties.ContentDescription].single()
+        assertThat(lux).matches("""Lux by week: (\d+) this week, \1 over 12 weeks, best week \1\.""")
+        val categoryRow = hasContentDescription(": 1 closed", substring = true)
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(categoryRow)
+        compose.onAllNodes(categoryRow).assertCountEquals(1)
+        compose.onAllNodesWithText("Nothing closed yet", substring = true).assertCountEquals(0)
+    }
+
     @Test
     fun theNarratorLineIsReadOutOnceItAppears() {
         startAs("Sam")

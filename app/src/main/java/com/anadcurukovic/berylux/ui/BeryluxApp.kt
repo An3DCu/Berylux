@@ -38,6 +38,7 @@ import com.anadcurukovic.berylux.core.designsystem.BeryluxType
 import com.anadcurukovic.berylux.core.navigation.CasesRoute
 import com.anadcurukovic.berylux.core.navigation.CategoryRoute
 import com.anadcurukovic.berylux.core.navigation.EditorRoute
+import com.anadcurukovic.berylux.core.navigation.FileRoomRoute
 import com.anadcurukovic.berylux.core.navigation.Navigator
 import com.anadcurukovic.berylux.core.navigation.ProfileRoute
 import com.anadcurukovic.berylux.core.navigation.RivalsRoute
@@ -112,7 +113,10 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
             onEditChallenge = { navigator.navigate(EditorRoute(it)) },
         )
         editorEntries(onDone = { navigator.goBack() })
-        progressEntries(onOpenRivals = { navigator.navigate(RivalsRoute) })
+        progressEntries(
+            onOpenRivals = { navigator.navigate(RivalsRoute) },
+            onOpenFileRoom = { navigator.navigate(FileRoomRoute) },
+        )
         rivalsEntries()
         profileEntries(onOpenSettings = { navigator.navigate(SettingsRoute) }, onDone = { navigator.goBack() })
         settingsEntries()
