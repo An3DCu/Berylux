@@ -22,6 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import kotlin.time.Duration.Companion.seconds
 
 /** What each widget shows, and where its taps go, for each state. */
 @RunWith(RobolectricTestRunner::class)
@@ -44,7 +45,7 @@ class WidgetContentTest {
         DailyOnDesk(thirtyPages, "Mind", standing, lux, caseId)
 
     @Test
-    fun `the sign says when there's no streak yet`() = runGlanceAppWidgetUnitTest {
+    fun `the sign says when there's no streak yet`() = runGlanceAppWidgetUnitTest(TIMEOUT) {
         setContext(context)
         setAppWidgetSize(SMALL)
         provideComposable { SignContent(streak = 0) }
@@ -53,7 +54,7 @@ class WidgetContentTest {
     }
 
     @Test
-    fun `the sign gives the day, and a tap opens Today`() = runGlanceAppWidgetUnitTest {
+    fun `the sign gives the day, and a tap opens Today`() = runGlanceAppWidgetUnitTest(TIMEOUT) {
         setContext(context)
         setAppWidgetSize(SMALL)
         provideComposable { SignContent(streak = 3) }
@@ -63,7 +64,7 @@ class WidgetContentTest {
     }
 
     @Test
-    fun `not taken, it offers to take the case on Today`() = runGlanceAppWidgetUnitTest {
+    fun `not taken, it offers to take the case on Today`() = runGlanceAppWidgetUnitTest(TIMEOUT) {
         setContext(context)
         setAppWidgetSize(WIDE)
         provideComposable { CaseContent(daily(DailyStanding.NOT_TAKEN)) }
@@ -75,7 +76,7 @@ class WidgetContentTest {
     }
 
     @Test
-    fun `taken, Close opens the app's own question for that case`() = runGlanceAppWidgetUnitTest {
+    fun `taken, Close opens the app's own question for that case`() = runGlanceAppWidgetUnitTest(TIMEOUT) {
         setContext(context)
         setAppWidgetSize(WIDE)
         provideComposable { CaseContent(daily(DailyStanding.OPEN, caseId = 12)) }
@@ -87,7 +88,7 @@ class WidgetContentTest {
     }
 
     @Test
-    fun `closed, it shows the stamp and what the case earned`() = runGlanceAppWidgetUnitTest {
+    fun `closed, it shows the stamp and what the case earned`() = runGlanceAppWidgetUnitTest(TIMEOUT) {
         setContext(context)
         setAppWidgetSize(WIDE)
         provideComposable { CaseContent(daily(DailyStanding.CLOSED, caseId = 12)) }
@@ -97,7 +98,7 @@ class WidgetContentTest {
     }
 
     @Test
-    fun `before there's a player, a tap opens the welcome screen`() = runGlanceAppWidgetUnitTest {
+    fun `before there's a player, a tap opens the welcome screen`() = runGlanceAppWidgetUnitTest(TIMEOUT) {
         setContext(context)
         setAppWidgetSize(WIDE)
         provideComposable { CaseContent(daily = null) }
@@ -106,6 +107,9 @@ class WidgetContentTest {
     }
 
     private companion object {
+        // Glance gives a test 2 seconds by default. The first test in a run also loads Robolectric,
+        // Glance and the fonts, which took 14 seconds on CI.
+        val TIMEOUT = 30.seconds
         val SMALL = DpSize(110.dp, 110.dp)
         val WIDE = DpSize(250.dp, 110.dp)
     }
