@@ -11,6 +11,7 @@ import com.anadcurukovic.berylux.core.model.UserSettings
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 /*
@@ -105,6 +106,13 @@ interface SettingsRepository {
     suspend fun setEffectsLevel(level: Int)
 
     suspend fun setMotion(motion: MotionMode)
+
+    suspend fun setReminderOn(on: Boolean)
+
+    suspend fun setReminderTime(time: LocalTime)
+
+    /** The player's answer to the offer in Cases: yes turns the reminder on. Either way it's never offered again. */
+    suspend fun answerReminderOffer(yes: Boolean)
 
     /** When the player last looked at Progress; unlocks after it are new. The epoch before the first look. */
     val achievementsSeenAt: Flow<Instant>

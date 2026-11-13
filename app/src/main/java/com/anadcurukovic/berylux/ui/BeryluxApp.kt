@@ -83,6 +83,10 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
     val state = rememberNavigationState(startRoute = TodayRoute, topLevelRoutes = tabs.map { it.route })
     val navigator = remember(state) { Navigator(state) }
 
+    LaunchedEffect(appViewModel, navigator) {
+        appViewModel.openTodayFlow.collect { navigator.openAtRoot(TodayRoute) }
+    }
+
     val entryProvider = entryProvider {
         todayEntries(onOpenProfile = { navigator.navigate(ProfileRoute) })
         casesEntries(onOpenToday = { navigator.navigate(TodayRoute) })

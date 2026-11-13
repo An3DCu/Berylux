@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.time.Instant
+import java.time.LocalTime
 
 class SettingsDataSourceTest {
     private fun newStore() = InMemoryPreferencesDataStore()
@@ -68,6 +69,40 @@ class SettingsDataSourceTest {
 
         store.edit { it[stringPreferencesKey("motion")] = "SLOW" }
         assertThat(source.settings.first().motion).isEqualTo(MotionMode.FOLLOW_PHONE)
+    }
+
+    @Test
+    fun `the morning docket starts off at 9, and its time is kept to the minute`() = runTest {
+        val source = SettingsDataSource(newStore())
+        source.settings.first().let {
+            assertThat(it.reminderOn).isFalse()
+            assertThat(it.reminderTime).isEqualTo(LocalTime.of(9, 0))
+            assertThat(it.reminderAsked).isFalse()
+        }
+        source.setReminderTime(LocalTime.of(7, 45, 30))
+        source.setReminderOn(true)
+        assertThat(source.settings.first().reminderTime).isEqualTo(LocalTime.of(7, 45))
+        assertThat(source.settings.first().reminderOn).isTrue()
+    }
+
+    @Test
+    fun `answering the offer marks it answered, and only yes turns the reminder on`() = runTest {
+        val no = SettingsDataSource(newStore())
+        no.answerReminderOffer(yes = false)
+        assertThat(no.settings.first().reminderAsked).isTrue()
+        assertThat(no.settings.first().reminderOn).isFalse()
+
+        val yes = SettingsDataSource(newStore())
+        yes.answerReminderOffer(yes = true)
+        assertThat(yes.settings.first().reminderAsked).isTrue()
+        assertThat(yes.settings.first().reminderOn).isTrue()
+    }
+
+    @Test
+    fun `a stored minute outside the day reads as 9 AM`() = runTest {
+        val store = newStore()
+        store.edit { it[intPreferencesKey("reminder_minute")] = 1440 }
+        assertThat(SettingsDataSource(store).settings.first().reminderTime).isEqualTo(LocalTime.of(9, 0))
     }
 
     @Test

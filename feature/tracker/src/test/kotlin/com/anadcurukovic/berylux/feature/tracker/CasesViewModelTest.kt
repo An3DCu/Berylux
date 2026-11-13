@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.anadcurukovic.berylux.core.domain.CaseActions
 import com.anadcurukovic.berylux.core.domain.GameClock
 import com.anadcurukovic.berylux.core.domain.Narration
+import com.anadcurukovic.berylux.core.domain.PlayerCaseFiles
 import com.anadcurukovic.berylux.core.model.CaseStatus
 import com.anadcurukovic.berylux.core.model.Category
 import com.anadcurukovic.berylux.core.model.CategoryKind
@@ -28,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CasesViewModelTest {
@@ -46,15 +48,16 @@ class CasesViewModelTest {
 
     // 14:00 UTC is 15:00 in Sarajevo: the game day is 6 November.
     private val time = FakeTimeSource(Instant.parse("2026-11-06T14:00:00Z"))
-    private val clock = GameClock(time, FakeSettingsRepository())
+    private val settings = FakeSettingsRepository()
+    private val clock = GameClock(time, settings)
     private val saved = SavedStateHandle()
 
     private fun newViewModel() = CasesViewModel(
-        profiles = profiles,
+        playerCaseFiles = PlayerCaseFiles(profiles, cases),
         challenges = challenges,
-        cases = cases,
         clock = clock,
         actions = CaseActions(profiles, cases, clock, time),
+        settings = settings,
         savedState = saved,
     )
 
@@ -153,6 +156,53 @@ class CasesViewModelTest {
 
         viewModel.onLeave()
         assertThat(content().justClosed).isNull()
+    }
+
+    private suspend fun TestScope.closeOne(challengeId: Long) {
+        take(challengeId)
+        val case = content().today.first { it.status == CaseStatus.OPEN }
+        viewModel.onClose(case)
+        viewModel.messageFlow.test {
+            viewModel.onConfirm()
+            awaitItem()
+        }
+    }
+
+    @Test
+    fun `after a close the morning docket is offered until the player answers yes`() = runTest {
+        keepCollecting()
+        assertThat(content().reminderOffer).isNull()
+
+        closeOne(1)
+        assertThat(content().reminderOffer).isEqualTo(LocalTime.of(9, 0))
+
+        viewModel.onReminderAnswer(true)
+        assertThat(settings.settings.first().reminderOn).isTrue()
+        assertThat(settings.settings.first().reminderAsked).isTrue()
+        assertThat(content().reminderOffer).isNull()
+    }
+
+    @Test
+    fun `no ends the offer for good and leaves the reminder off`() = runTest {
+        keepCollecting()
+        closeOne(1)
+        viewModel.onReminderAnswer(false)
+        assertThat(settings.settings.first().reminderOn).isFalse()
+
+        closeOne(2)
+        assertThat(content().justClosed).isNotNull()
+        assertThat(content().reminderOffer).isNull()
+    }
+
+    @Test
+    fun `an unanswered offer comes back with the next close`() = runTest {
+        keepCollecting()
+        closeOne(1)
+        viewModel.onLeave()
+        assertThat(content().reminderOffer).isNull()
+
+        closeOne(2)
+        assertThat(content().reminderOffer).isEqualTo(LocalTime.of(9, 0))
     }
 
     @Test

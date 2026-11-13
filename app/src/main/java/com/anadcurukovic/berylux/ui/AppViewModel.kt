@@ -70,6 +70,15 @@ class AppViewModel @Inject constructor(
         .map { it.motion }
         .stateIn(viewModelScope, SharingStarted.Eagerly, MotionMode.FOLLOW_PHONE)
 
+    private val todayRequests = Channel<Unit>(Channel.CONFLATED)
+
+    /** Each time the morning docket is tapped: the tabs move to Today. */
+    val openTodayFlow: Flow<Unit> = todayRequests.receiveAsFlow()
+
+    fun openToday() {
+        todayRequests.trySend(Unit)
+    }
+
     private val unlocks = Channel<Achievement>(Channel.UNLIMITED)
 
     /** Each achievement unlocked while the app runs, once, for a message. */

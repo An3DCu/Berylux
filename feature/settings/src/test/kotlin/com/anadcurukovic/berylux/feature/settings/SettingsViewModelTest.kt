@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalTime
 
 class SettingsViewModelTest {
     @get:Rule
@@ -33,7 +34,7 @@ class SettingsViewModelTest {
     private fun content() = viewModel.uiState.value as SettingsUiState.Content
 
     @Test
-    fun `it opens with the hour, the theme, the effects and the motion in force`() = runTest {
+    fun `it opens with the hour, the docket, the theme, the effects and the motion in force`() = runTest {
         keepCollecting()
         assertThat(content()).isEqualTo(
             SettingsUiState.Content(
@@ -42,6 +43,8 @@ class SettingsViewModelTest {
                 theme = ThemeMode.DARK,
                 effectsLevel = 3,
                 motion = MotionMode.FOLLOW_PHONE,
+                reminderOn = false,
+                reminderTime = LocalTime.of(9, 0),
             ),
         )
     }
@@ -81,6 +84,18 @@ class SettingsViewModelTest {
         viewModel.onEffectsLevel(5)
         viewModel.onEffectsLevel(9)
         assertThat(settings.settings.first()).isEqualTo(UserSettings(theme = ThemeMode.DAYLIGHT, effectsLevel = 5))
+    }
+
+    @Test
+    fun `the morning docket is turned on and moved at once`() = runTest {
+        keepCollecting()
+        viewModel.onReminderOn(true)
+        viewModel.onReminderTime(LocalTime.of(7, 30))
+        assertThat(content().reminderOn).isTrue()
+        assertThat(content().reminderTime).isEqualTo(LocalTime.of(7, 30))
+
+        viewModel.onReminderOn(false)
+        assertThat(settings.settings.first().reminderOn).isFalse()
     }
 
     @Test

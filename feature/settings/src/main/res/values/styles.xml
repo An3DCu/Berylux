@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android's own clock picker for the morning docket, in the app's red: bright red beryl on the
+         dark desk, red beryl on case paper. The same colors as the design system's tokens. -->
+    <style name="Berylux.ClockPicker.Desk" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">#E43A64</item>
+    </style>
+
+    <style name="Berylux.ClockPicker.Paper" parent="android:Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">#9E1538</item>
+    </style>
+</resources>

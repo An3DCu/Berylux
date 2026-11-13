@@ -69,4 +69,9 @@
     <string name="narrator_day_21">Three weeks. People are starting to talk.</string>
     <string name="narrator_day_28">Four weeks. One more day and it\'s stamped.</string>
     <string name="narrator_day_29">Stamped. This streak is on the record.</string>
+
+    <!-- Under the narrator's line after a close, until the player answers. -->
+    <string name="cases_reminder_offer">Want the docket at %1$s?</string>
+    <string name="cases_reminder_yes">Yes</string>
+    <string name="cases_reminder_no">No</string>
 </resources>

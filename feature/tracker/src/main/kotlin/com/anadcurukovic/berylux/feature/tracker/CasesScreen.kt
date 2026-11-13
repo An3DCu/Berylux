@@ -85,6 +85,7 @@ fun CasesScreen(
             onOpenToday = onOpenToday,
             onClose = viewModel::onClose,
             onDrop = viewModel::onDrop,
+            onReminderAnswer = rememberReminderAnswer(viewModel::onReminderAnswer),
             contentPadding = padding,
         )
     }
@@ -107,6 +108,7 @@ fun CasesContent(
     onClose: (CaseUi) -> Unit,
     onDrop: (CaseUi) -> Unit,
     modifier: Modifier = Modifier,
+    onReminderAnswer: (Boolean) -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     when (state) {
@@ -136,6 +138,7 @@ fun CasesContent(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     CaseFileCard(case, onClose, onDrop, stampLands = just != null)
                     just?.let { NarratorLine(it) }
+                    if (just != null) state.reminderOffer?.let { ReminderOffer(it, onReminderAnswer) }
                 }
             }
             history(state.history)

@@ -2,4 +2,9 @@
     <string name="app_name">Berylux</string>
     <!-- Shown over any screen when an achievement unlocks. -->
     <string name="unlocked">On the record: %1$s</string>
+
+    <!-- The morning docket: the channel's name in Android's settings, and the notice itself. -->
+    <string name="reminder_channel">Morning docket</string>
+    <string name="reminder_title">Today\'s docket is in.</string>
+    <string name="reminder_text">%1$s leads the day.</string>
 </resources>
