@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 11 and lower: back up everything the app stores. -->
-<full-backup-content />
+<!-- Android 11 and lower: back up everything the app stores but the sign-in tokens. Their key stays
+     in this phone's Keystore, and a copy of them anywhere else is a way into the account. -->
+<full-backup-content>
+    <exclude domain="file" path="datastore/tokens.preferences_pb" />
+</full-backup-content>
