@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 12 and higher: cloud backup and device transfer keep everything the app stores. -->
+<!-- Android 12 and higher: cloud backup and device transfer keep everything the app stores but the
+     sign-in tokens. Their key stays in this phone's Keystore; a new phone signs in again. -->
 <data-extraction-rules>
-    <cloud-backup />
-    <device-transfer />
+    <cloud-backup>
+        <exclude domain="file" path="datastore/tokens.preferences_pb" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/tokens.preferences_pb" />
+    </device-transfer>
 </data-extraction-rules>

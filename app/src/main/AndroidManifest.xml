@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Accounts talk to Berylux-API. A normal permission: Android grants it without asking. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- The morning docket. Asked for only when the player says yes to it. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- WorkManager asks for these for network conditions and long-running work; the reminder uses
