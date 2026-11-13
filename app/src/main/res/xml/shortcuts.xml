@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher's shortcuts: long-press the app icon. Each opens MainActivity with an action from
+     AppLinks; the package and class are spelled out because resources can't read the build. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="case_files"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_cases"
+        android:shortcutShortLabel="@string/shortcut_cases_short"
+        android:shortcutLongLabel="@string/shortcut_cases_long">
+        <intent
+            android:action="com.anadcurukovic.berylux.OPEN_CASES"
+            android:targetClass="com.anadcurukovic.berylux.MainActivity"
+            android:targetPackage="com.anadcurukovic.berylux" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="todays_docket"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_today"
+        android:shortcutShortLabel="@string/shortcut_today_short"
+        android:shortcutLongLabel="@string/shortcut_today_long">
+        <intent
+            android:action="com.anadcurukovic.berylux.OPEN_TODAY"
+            android:targetClass="com.anadcurukovic.berylux.MainActivity"
+            android:targetPackage="com.anadcurukovic.berylux" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="write_a_case"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_write"
+        android:shortcutShortLabel="@string/shortcut_write_short"
+        android:shortcutLongLabel="@string/shortcut_write_long">
+        <intent
+            android:action="com.anadcurukovic.berylux.WRITE_CASE"
+            android:targetClass="com.anadcurukovic.berylux.MainActivity"
+            android:targetPackage="com.anadcurukovic.berylux" />
+    </shortcut>
+</shortcuts>

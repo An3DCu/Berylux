@@ -4,8 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.material3.Badge
@@ -27,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +40,7 @@ import com.anadcurukovic.berylux.R
 import com.anadcurukovic.berylux.core.designsystem.Berylux
 import com.anadcurukovic.berylux.core.designsystem.BeryluxType
 import com.anadcurukovic.berylux.core.navigation.CasesRoute
+import com.anadcurukovic.berylux.core.navigation.CatalogRoute
 import com.anadcurukovic.berylux.core.navigation.CategoryRoute
 import com.anadcurukovic.berylux.core.navigation.EditorRoute
 import com.anadcurukovic.berylux.core.navigation.FileRoomRoute
@@ -67,7 +72,12 @@ fun BeryluxApp(modifier: Modifier = Modifier, appViewModel: AppViewModel = hiltV
     when (appState) {
         // The first read of the database takes a moment; the window background shows meanwhile.
         AppState.Loading -> Unit
-        AppState.NeedsProfile -> WelcomeScreen(modifier = modifier)
+        AppState.NeedsProfile -> Box(
+            modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            WelcomeScreen(modifier = Modifier.widthIn(max = READING_WIDTH_DP.dp))
+        }
         AppState.Ready -> BeryluxTabs(appViewModel, modifier = modifier)
     }
 }
@@ -89,7 +99,17 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
     val navigator = remember(state) { Navigator(state) }
 
     LaunchedEffect(appViewModel, navigator) {
-        appViewModel.openTodayFlow.collect { navigator.openAtRoot(TodayRoute) }
+        appViewModel.openFlow.collect { destination ->
+            when (destination) {
+                Destination.TODAY -> navigator.openAtRoot(TodayRoute)
+                Destination.CASES -> navigator.openAtRoot(CasesRoute)
+                Destination.WRITE_CASE -> {
+                    // The editor opens over Catalog, where a new case is written from.
+                    navigator.openAtRoot(CatalogRoute)
+                    navigator.navigate(EditorRoute())
+                }
+            }
+        }
     }
     // A case to ask "Close it?" for, from the widget, until Cases has asked.
     var closeRequest by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -142,9 +162,11 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
     ) {
         // Unlock messages drop in at the top of whatever screen is open; a screen's own
         // messages keep the bottom, so both can show at once.
-        Box {
+        // On a wide screen the screens keep to a reading width in the middle; the desk fills the rest.
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             val calm = Berylux.reducedMotion
             NavDisplay(
+                modifier = Modifier.align(Alignment.TopCenter).widthIn(max = READING_WIDTH_DP.dp).fillMaxHeight(),
                 entries = state.toDecoratedEntries(entryProvider),
                 onBack = { navigator.goBack() },
                 transitionSpec = { sceneTransition(back = false, calm) },
@@ -169,4 +191,5 @@ private fun BeryluxTabs(appViewModel: AppViewModel, modifier: Modifier = Modifie
 }
 
 private const val TAB_LABEL_SP = 13
+private const val READING_WIDTH_DP = 720
 private val TabLabel = BeryluxType.Button.copy(fontSize = TAB_LABEL_SP.sp)

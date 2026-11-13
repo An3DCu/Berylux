@@ -11,6 +11,10 @@ import android.net.Uri
  */
 object AppLinks {
     const val OPEN_TODAY = "com.anadcurukovic.berylux.OPEN_TODAY"
+
+    // The launcher's shortcuts name these two in res/xml/shortcuts.xml.
+    const val OPEN_CASES = "com.anadcurukovic.berylux.OPEN_CASES"
+    const val WRITE_CASE = "com.anadcurukovic.berylux.WRITE_CASE"
     const val CLOSE_CASE = "com.anadcurukovic.berylux.CLOSE_CASE"
 
     /** Opens the app as the launcher does: the welcome screen before there's a player. */

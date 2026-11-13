@@ -24,6 +24,7 @@ import com.anadcurukovic.berylux.core.model.ThemeMode
 import com.anadcurukovic.berylux.core.navigation.AppLinks
 import com.anadcurukovic.berylux.ui.AppViewModel
 import com.anadcurukovic.berylux.ui.BeryluxApp
+import com.anadcurukovic.berylux.ui.Destination
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -70,11 +71,26 @@ class MainActivity : ComponentActivity() {
         follow(intent)
     }
 
-    /** Today from the morning docket and the widgets; Cases with "Close it?" from Today's case. */
+    /**
+     * Today from the morning docket and the widgets; Cases with "Close it?" from Today's case; Cases,
+     * Today or the editor from the launcher's shortcuts.
+     */
     private fun follow(intent: Intent) {
-        when (intent.action) {
-            AppLinks.OPEN_TODAY -> appViewModel.openToday()
-            AppLinks.CLOSE_CASE -> AppLinks.caseToClose(intent)?.let(appViewModel::closeCase)
+        val caseToClose = AppLinks.caseToClose(intent)
+        if (caseToClose != null) {
+            appViewModel.closeCase(caseToClose)
+        } else {
+            destinationOf(intent.action)?.let(appViewModel::open)
+        }
+    }
+
+    internal companion object {
+        /** Where an action from the morning docket, a widget or a shortcut opens the app; null for any other. */
+        fun destinationOf(action: String?): Destination? = when (action) {
+            AppLinks.OPEN_TODAY -> Destination.TODAY
+            AppLinks.OPEN_CASES -> Destination.CASES
+            AppLinks.WRITE_CASE -> Destination.WRITE_CASE
+            else -> null
         }
     }
 
