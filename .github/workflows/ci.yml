@@ -31,3 +31,6 @@ jobs:
       - name: Build and check
         # The flag makes the screenshot tests compare against the committed images.
         run: ./gradlew assembleDebug detekt :app:lintDebug test -Proborazzi.test.verify=true --stacktrace
+
+      - name: Coverage of the rules
+        run: ./gradlew :core:domain:koverLog
