@@ -80,6 +80,16 @@ class StreaksTest {
     }
 
     @Test
+    fun `a saved day stays on record after the streak it saved has ended`() {
+        // The 8th is saved; the 11th and 12th are missed with no freeze left.
+        val state = Streaks.calculate(novRange(1, 7) + novRange(9, 10) + nov(13), today = nov(13))
+        assertThat(state.current).isEqualTo(1)
+        assertThat(state.frozenDays).isEmpty()
+        assertThat(state.savedDays).containsExactly(nov(8))
+        assertThat(state.freezesUsed).isEqualTo(1)
+    }
+
+    @Test
     fun `yesterday's miss uses the freeze even before today is done`() {
         val state = Streaks.calculate(novRange(1, 7), today = nov(9))
         assertThat(state.current).isEqualTo(7)

@@ -30,6 +30,10 @@ data object ProgressRoute : NavKey
 @Serializable
 data object RivalsRoute : NavKey
 
+/** The file room: Lux by week, the streak calendar and closed cases by category, from Progress. */
+@Serializable
+data object FileRoomRoute : NavKey
+
 @Serializable
 data object ProfileRoute : NavKey
 

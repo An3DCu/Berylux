@@ -54,13 +54,14 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ProgressScreen(
     onOpenRivals: () -> Unit,
+    onOpenFileRoom: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProgressViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.onShown() }
     Scaffold(modifier = modifier) { padding ->
-        ProgressContent(state, onOpenRivals, contentPadding = padding)
+        ProgressContent(state, onOpenRivals, onOpenFileRoom, contentPadding = padding)
     }
 }
 
@@ -69,6 +70,7 @@ fun ProgressScreen(
 fun ProgressContent(
     state: ProgressUiState,
     onOpenRivals: () -> Unit,
+    onOpenFileRoom: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -96,6 +98,14 @@ fun ProgressContent(
                 StampOutlineButton(
                     text = stringResource(R.string.progress_rivals),
                     onClick = onOpenRivals,
+                    modifier = Modifier.fillMaxWidth(),
+                    onDesk = true,
+                )
+            }
+            item {
+                StampOutlineButton(
+                    text = stringResource(R.string.progress_file_room),
+                    onClick = onOpenFileRoom,
                     modifier = Modifier.fillMaxWidth(),
                     onDesk = true,
                 )
@@ -238,6 +248,7 @@ private fun ProgressPreview() {
                 },
             ),
             onOpenRivals = {},
+            onOpenFileRoom = {},
         )
     }
 }
